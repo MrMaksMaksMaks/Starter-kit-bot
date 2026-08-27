@@ -47,7 +47,7 @@ This project is designed as a **Public Good** for the Solana ecosystem, lowering
 - **SQLite** — Local database
 
 ### 🏗️ Architecture
-
+```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │ Telegram User │
 └─────────────────────────────┬───────────────────────────────────┘
@@ -82,7 +82,7 @@ This project is designed as a **Public Good** for the Solana ecosystem, lowering
 ├─────────────┴─────────────┴─────────────┴─────────────────────┤
 │ SQLite Database │
 └─────────────────────────────────────────────────────────────────┘
-
+```
 ### 🚀 Quick Start
 
 #### 1. Clone the repository
@@ -92,14 +92,14 @@ git clone https://github.com/MrMaksMaksMaks/Starter-kit-bot.git
 cd Starter-kit-bot
 ```
 
-2. Set up environment variables
+#### 2. Set up environment variables
 
 ```bash
 cp .env.example .env
 # Fill in your keys (Telegram Bot Token, Openfort keys, etc.)
 ```
 
-3. Build and run
+#### 3. Build and run
 
 ```bash
 cargo build --release
@@ -160,7 +160,7 @@ Kora — gasless транзакции
 SQLite — локальная база данных
 
 🏗️ Архитектура
-
+```bash
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Пользователь Telegram                   │
 └─────────────────────────────┬───────────────────────────────────┘
@@ -195,23 +195,24 @@ SQLite — локальная база данных
 ├─────────────┴─────────────┴─────────────┴─────────────────────┤
 │                         SQLite Database                        │
 └─────────────────────────────────────────────────────────────────┘
+```
 
-🚀 Быстрый старт
-1. Клонирование репозитория
+#### 🚀 Быстрый старт
+#### 1. Клонирование репозитория
 
 ```bash
 git clone https://github.com/MrMaksMaksMaks/Starter-kit-bot.git
 cd Starter-kit-bot
 ```
 
-2. Настройка переменных окружения
+#### 2. Настройка переменных окружения
 
 ```bash
 cp .env.example .env
 # Fill in your keys (Telegram Bot Token, Openfort keys, etc.)
 ```
 
-3. Сборка и запуск
+#### 3. Сборка и запуск
 
 ```bash
 cargo build --release
