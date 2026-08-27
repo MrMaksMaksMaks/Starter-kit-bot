@@ -514,7 +514,7 @@ Do not assume that using an external wallet infrastructure provider eliminates t
 
 # 🗺️ Roadmap
 
-The core functionality is already implemented:
+## ✅The core functionality is already implemented:
 
 - [x] Telegram Bot
 - [x] Openfort Backend Wallet creation
@@ -527,20 +527,26 @@ The core functionality is already implemented:
 - [x] SQLite persistence
 - [x] Jupiter referral support
 
-Potential future improvements:
+## 🚀 Short-term (next 3 months)
 
-- [ ] Transaction history
-- [ ] Inline keyboard UI
-- [ ] Improved swap interface
-- [ ] More SPL tokens
-- [ ] Token metadata and logos
-- [ ] Security audit
-- [ ] Advanced withdrawal protection
-- [ ] Admin dashboard
-- [ ] Docker deployment
-- [ ] Production deployment guide
-- [ ] Comprehensive integration tests
-- [ ] Automated CI/CD
+- [ ] **Transaction history** — view all user swaps and withdrawals
+- [ ] **Inline keyboard UI** — better UX with buttons instead of text commands
+- [ ] **More SPL tokens** — support for popular tokens (JUP, RAY, etc.)
+- [ ] **Token metadata & logos** — display token icons and names
+- [ ] **Security audit** — external security review of the codebase
+
+## 🎯 Medium-term (3-6 months)
+
+- [ ] **Limit orders** — set buy/sell orders at specific prices
+- [ ] **DCA (Dollar-Cost Averaging)** — automate periodic purchases
+- [ ] **Advanced withdrawal protection** — whitelist addresses, daily limits
+
+## 🏆 Long-term (6+ months)
+
+- [ ] **Token sniping** — automatic purchase of new tokens at launch
+- [ ] **Copy trading** — follow and replicate trades of successful wallets
+- [ ] **Production deployment guide** — comprehensive guide for deploying the bot
+- [ ] **Integration tests** — full test suite for all commands and flows
 
 ---
 
@@ -1099,35 +1105,41 @@ Recovery phrase
 
 ---
 
-# 🗺️ Roadmap
+# 🗺️ Дорожная карта
 
-Основная функциональность уже реализована:
+## ✅ Уже реализовано
 
-- [x] Telegram Bot
-- [x] Openfort Backend Wallet
-- [x] Создание кошельков
-- [x] SOL balance
-- [x] SPL token balance
-- [x] Jupiter swaps
-- [x] SOL withdrawals
-- [x] Kora gasless transaction flow
-- [x] SQLite
+- [x] Telegram бот
+- [x] Создание Openfort Backend Wallet
+- [x] Управление Solana-кошельком
+- [x] Баланс SOL
+- [x] Баланс SPL-токенов
+- [x] Jupiter свопы
+- [x] Вывод SOL
+- [x] Kora gasless транзакции
+- [x] SQLite persistence
 - [x] Jupiter referral support
 
-Возможные дальнейшие улучшения:
+## 🚀 Ближайшие планы (3 месяца)
 
-- [ ] История транзакций
-- [ ] Inline keyboards
-- [ ] Улучшенный swap UI
-- [ ] Поддержка большего количества SPL-токенов
-- [ ] Token metadata и logos
-- [ ] Security audit
-- [ ] Расширенная защита withdrawals
-- [ ] Admin dashboard
-- [ ] Docker deployment
-- [ ] Production deployment guide
-- [ ] Integration tests
-- [ ] CI/CD
+- [ ] **История транзакций** — просмотр всех свопов и выводов пользователя
+- [ ] **Инлайн-клавиатура** — улучшенный UX с кнопками вместо текстовых команд
+- [ ] **Поддержка большего количества SPL-токенов** — популярные токены (JUP, RAY и др.)
+- [ ] **Метаданные и логотипы токенов** — отображение иконок и названий токенов
+- [ ] **Аудит безопасности** — внешняя проверка безопасности кодовой базы
+
+## 🎯 Среднесрочные планы (3–6 месяцев)
+
+- [ ] **Лимитные ордера** — установка ордеров на покупку/продажу по заданной цене
+- [ ] **DCA (усреднение цены)** — автоматическая периодическая покупка
+- [ ] **Расширенная защита вывода** — белый список адресов, дневные лимиты
+
+## 🏆 Долгосрочные планы (6+ месяцев)
+
+- [ ] **Снайпинг токенов** — автоматическая покупка новых токенов при запуске
+- [ ] **Копитрейдинг** — отслеживание и повторение сделок успешных кошельков
+- [ ] **Руководство по production-развертыванию** — полное руководство по деплою бота
+- [ ] **Интеграционные тесты** — полный набор тестов для всех команд и сценариев
 
 ---
 
