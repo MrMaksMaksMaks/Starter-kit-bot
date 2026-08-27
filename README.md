@@ -47,6 +47,7 @@ This project is designed as a **Public Good** for the Solana ecosystem, lowering
 - **SQLite** — Local database
 
 ### 🏗️ Architecture
+
 ┌─────────────────────────────────────────────────────────────────┐
 │ Telegram User │
 └─────────────────────────────┬───────────────────────────────────┘
@@ -82,22 +83,29 @@ This project is designed as a **Public Good** for the Solana ecosystem, lowering
 │ SQLite Database │
 └─────────────────────────────────────────────────────────────────┘
 
-text
-
 ### 🚀 Quick Start
 
 #### 1. Clone the repository
+
 ```bash
 git clone https://github.com/MrMaksMaksMaks/Starter-kit-bot.git
 cd Starter-kit-bot
+```
+
 2. Set up environment variables
-bash
+
+```bash
 cp .env.example .env
 # Fill in your keys (Telegram Bot Token, Openfort keys, etc.)
+```
+
 3. Build and run
-bash
+
+```bash
 cargo build --release
 cargo run
+```
+
 💰 Monetization
 The bot includes a Jupiter Referral Program with 50 bps (0.5%) commission on swaps. This provides a sustainable revenue model for developers while maintaining full transparency and non-custodial nature.
 
@@ -152,7 +160,7 @@ Kora — gasless транзакции
 SQLite — локальная база данных
 
 🏗️ Архитектура
-text
+
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Пользователь Telegram                   │
 └─────────────────────────────┬───────────────────────────────────┘
@@ -187,19 +195,29 @@ text
 ├─────────────┴─────────────┴─────────────┴─────────────────────┤
 │                         SQLite Database                        │
 └─────────────────────────────────────────────────────────────────┘
+
 🚀 Быстрый старт
 1. Клонирование репозитория
-bash
+
+```bash
 git clone https://github.com/MrMaksMaksMaks/Starter-kit-bot.git
 cd Starter-kit-bot
+```
+
 2. Настройка переменных окружения
-bash
+
+```bash
 cp .env.example .env
-# Заполните своими ключами (Telegram Bot Token, Openfort, etc.)
+# Fill in your keys (Telegram Bot Token, Openfort keys, etc.)
+```
+
 3. Сборка и запуск
-bash
+
+```bash
 cargo build --release
 cargo run
+```
+
 💰 Монетизация
 Бот включает реферальную программу Jupiter с комиссией 50 bps (0.5%) от свопов. Это обеспечивает устойчивую модель дохода для разработчиков, сохраняя полную прозрачность и некастодиальность.
 
