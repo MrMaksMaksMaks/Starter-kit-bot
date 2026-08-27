@@ -47,17 +47,8 @@ This project is designed as a **Public Good** for the Solana ecosystem, lowering
 - **SQLite** — Local database
 
 ### 🏗️ Architecture
-src/
-├── bin/main.rs # Entry point & command handlers
-├── balance/ # SOL & token balance checks
-├── config/ # Environment configuration
-├── db/ # SQLite database operations
-├── jupiter/ # Jupiter API integration (swap, referral)
-├── openfort/ # Wallet management & signing
-├── solana/ # RPC interactions
-└── withdraw/ # Gasless SOL withdrawals via Kora
 
-text
+![Architecture](architecture.png)
 
 ### 🚀 Quick Start
 
@@ -127,16 +118,8 @@ Kora — gasless транзакции
 SQLite — локальная база данных
 
 🏗️ Архитектура
-text
-src/
-├── bin/main.rs      # Точка входа и обработка команд
-├── balance/         # Проверка баланса SOL и токенов
-├── config/          # Конфигурация из .env
-├── db/              # Операции с SQLite
-├── jupiter/         # Интеграция с Jupiter API (своп, рефералка)
-├── openfort/        # Управление кошельками и подпись
-├── solana/          # RPC-запросы к Solana
-└── withdraw/        # Gasless вывод SOL через Kora
+https://architecture.png
+
 🚀 Быстрый старт
 1. Клонирование репозитория
 bash
