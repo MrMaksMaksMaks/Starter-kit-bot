@@ -305,6 +305,8 @@ async fn main() -> Result<()> {
                             &output_mint,
                             amount_lamports,
                             100,
+                            config.referral_account.as_deref(),
+                            Some(config.referral_fee_bps),
                         ).await {
                             Ok(result) => {
                                 let out_decimals = resolve_decimals(&config.solana_rpc_url, &output_mint)
@@ -395,6 +397,8 @@ async fn main() -> Result<()> {
                             jupiter::tokens::SOL,
                             amount_raw,
                             100,
+                            config.referral_account.as_deref(),
+                            Some(config.referral_fee_bps),
                         ).await {
                             Ok(result) => {
                                 let received_sol = format_token_amount(&result.output_amount_result, 9);

@@ -42,7 +42,6 @@ pub struct PlatformFee {
     pub fee_mint: String,
 }
 
-
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExecuteResponse {
@@ -136,6 +135,8 @@ pub async fn get_order(
     taker: &str,
     slippage_bps: Option<u16>,
     exclude_jupiterz: bool,
+    referral_account: Option<&str>,
+    referral_fee_bps: Option<u16>,
 ) -> Result<OrderResponse> {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(15))
@@ -143,6 +144,7 @@ pub async fn get_order(
 
     let amount_str = amount.to_string();
     let slippage_str = slippage_bps.map(|s| s.to_string());
+    let referral_fee_str = referral_fee_bps.map(|f| f.to_string());
 
     let mut params = vec![
         ("inputMint", input_mint),
@@ -157,6 +159,12 @@ pub async fn get_order(
 
     if exclude_jupiterz {
         params.push(("excludeRouters", "jupiterz"));
+    }
+
+    // Реферальная комиссия — оба параметра нужны одновременно, иначе не имеет смысла
+    if let (Some(account), Some(ref fee)) = (referral_account, &referral_fee_str) {
+        params.push(("referralAccount", account));
+        params.push(("referralFee", fee.as_str()));
     }
 
     let url = format!(
@@ -292,6 +300,8 @@ pub async fn perform_swap(
     output_mint: &str,
     amount: u64,
     slippage_bps: u16,
+    referral_account: Option<&str>,
+    referral_fee_bps: Option<u16>,
 ) -> Result<ExecuteResponse> {
     let order = get_order(
         jupiter_api_key,
@@ -300,7 +310,9 @@ pub async fn perform_swap(
         amount,
         account_address,
         Some(slippage_bps),
-        true, // excludeRouters=jupiterz — гарантирует авто-создание ATA получателя
+        true,
+        referral_account,
+        referral_fee_bps,
     )
     .await?;
 

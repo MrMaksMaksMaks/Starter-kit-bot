@@ -16,7 +16,7 @@ pub struct Config {
     pub database_url: String,
     pub jupiter_api_key: String,
     pub referral_fee_bps: u16,
-    pub referal_account: String,
+    pub referral_account: Option<String>,
 }
 
 impl Config {
@@ -52,6 +52,7 @@ impl Config {
                 .unwrap_or_else(|_| "50".to_string())
                 .parse()
                 .context("REFERRAL_FEE_BPS должен быть числом (bps, например 50)")?,
+            referral_account: env::var("REFERRAL_ACCOUNT").ok().filter(|s| !s.is_empty()),
         })
     }
 }
