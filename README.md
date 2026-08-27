@@ -534,7 +534,7 @@ Potential future improvements:
 - [ ] Improved swap interface
 - [ ] More SPL tokens
 - [ ] Token metadata and logos
-- [ ] Multi-network support
+- [ ] Security audit
 - [ ] Advanced withdrawal protection
 - [ ] Admin dashboard
 - [ ] Docker deployment
@@ -1121,7 +1121,7 @@ Recovery phrase
 - [ ] Улучшенный swap UI
 - [ ] Поддержка большего количества SPL-токенов
 - [ ] Token metadata и logos
-- [ ] Multi-network support
+- [ ] Security audit
 - [ ] Расширенная защита withdrawals
 - [ ] Admin dashboard
 - [ ] Docker deployment
