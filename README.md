@@ -1,59 +1,310 @@
 # Solana Starter Kit Bot 🤖
 
-[![Rust](https://img.shields.io/badge/Rust-orange?logo=rust)](https://www.rust-lang.org/)
-[![Solana](https://img.shields.io/badge/Solana-3F3F3F?logo=solana)](https://solana.com/)
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram)](https://telegram.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+**Open-source starter kit for building Telegram-native Solana applications.**
 
-**Open-source Telegram bot starter kit for building Solana wallets, token swaps and DeFi applications with Rust.**
+Solana Starter Kit Bot is an open-source Telegram bot built with Rust that combines Solana wallet infrastructure, token swaps, withdrawals, and gasless transaction flows into a single working application.
 
-The project combines Telegram, Solana, Openfort Backend Wallets, Jupiter swaps and Kora gasless transactions into a single application that can be used as a starting point for building your own Solana Telegram bot.
+The project is intended to be more than a finished bot: it is a **reusable developer foundation** for anyone who wants to build a Telegram-based Solana application without implementing wallet, transaction, and swap infrastructure from scratch.
 
 ---
 
-## ✨ Features
+## 🎯 Why this project?
+
+Building a Telegram application that interacts with Solana requires several pieces of infrastructure to work together:
+
+- wallet creation and management;
+- secure transaction signing;
+- Solana RPC communication;
+- token swaps and liquidity routing;
+- transaction sponsorship;
+- persistent user and wallet state;
+- Telegram bot infrastructure.
+
+For an individual developer or a small team, integrating all of these components can become a significant barrier before the actual application idea can even be tested.
+
+**Solana Starter Kit Bot is designed to reduce that barrier.**
+
+The repository provides a working reference implementation that brings together:
+
+- **Openfort Backend Wallets** for wallet infrastructure and transaction signing;
+- **Jupiter** for token swaps and liquidity aggregation;
+- **Kora** for gasless transaction flows;
+- **Solana RPC** for blockchain interaction;
+- **Rust + Teloxide** for the Telegram application layer;
+- **SQLite** for persistent application data.
+
+The goal is to make the repository useful as a **public, reusable starting point** rather than as a closed application.
+
+Developers can fork the project, inspect the implementation, replace individual components, add their own business logic, and use the existing integration patterns as a foundation for new Solana applications.
+
+### The problem in one sentence
+
+> **Developers should be able to experiment with Telegram-native Solana applications without first building the entire wallet and transaction infrastructure themselves.**
+
+---
+
+## ☀️ Why Solana?
+
+The core idea of this project is to make on-chain interactions feel as simple as using a Telegram bot.
+
+That experience requires a blockchain environment where transactions can be:
+
+- fast enough for interactive applications;
+- inexpensive enough for frequent user actions;
+- supported by a mature token and DeFi ecosystem;
+- compatible with modern transaction sponsorship infrastructure.
+
+Solana is a particularly strong fit for this use case.
+
+### ⚡ Fast and inexpensive interactions
+
+A Telegram application can generate many small and frequent blockchain interactions.
+
+Users may check balances, swap tokens, send funds, or perform other on-chain actions directly from a conversational interface. Keeping those interactions practical requires low transaction costs and fast confirmation.
+
+Solana's performance and transaction economics make this type of user experience practical.
+
+### 💱 A mature DeFi ecosystem
+
+The project uses **Jupiter** as its swap infrastructure.
+
+This means the starter kit can provide token swaps while connecting the application to Solana's broader liquidity ecosystem instead of requiring developers to implement their own routing and liquidity logic.
+
+### ⛽ Gasless transaction infrastructure
+
+A major usability problem for blockchain applications is requiring users to maintain a separate balance of the native token just to pay transaction fees.
+
+This project integrates **Kora** to support gasless transaction flows.
+
+Combined with Openfort Backend Wallets, this allows developers to build Telegram experiences where transaction-fee management can be abstracted away from the user for supported flows.
+
+### 🧩 A strong developer ecosystem
+
+Solana already provides the building blocks needed for this type of application:
+
+- Solana RPC infrastructure;
+- a mature token ecosystem;
+- Jupiter liquidity infrastructure;
+- Kora transaction sponsorship;
+- Openfort wallet infrastructure;
+- Rust tooling and libraries;
+- a large ecosystem of DeFi applications and protocols.
+
+This starter kit connects those components into one understandable reference implementation.
+
+### Why build specifically for Solana?
+
+This project is intentionally **Solana-first**, not chain-agnostic.
+
+The objective is not to create a generic multi-chain wallet abstraction. The objective is to make it easier to build useful, Telegram-native applications specifically on Solana.
+
+The combination of low-cost transactions, high performance, mature DeFi infrastructure, and gasless transaction primitives creates a strong foundation for this type of application.
+
+---
+
+## 🌐 Solana ecosystem contribution
+
+This project is designed as an **open-source public good for Solana developers**.
+
+The Solana Foundation describes public goods as projects that make significant open-source contributions to the Solana ecosystem or provide meaningful free community offerings. It also emphasizes open-source learnings and asks applicants to clearly explain why their project is building within Solana.
+
+This repository is structured around those principles:
+
+### 📚 Learn from a working implementation
+
+Instead of documenting integrations only at a conceptual level, the repository contains a working application that demonstrates how the components interact.
+
+Developers can inspect the source code and use the implementation as a reference for their own projects.
+
+### 🧱 Reuse existing integrations
+
+The wallet, swap, transaction, and bot modules are separated so that developers can modify or replace individual parts of the stack.
+
+### 🔓 Open source by default
+
+The usable application code is publicly available so that other developers can fork it, learn from it, and build on top of it.
+
+### 🚀 Lower the entry barrier
+
+The project aims to reduce the amount of infrastructure work required before a developer can start experimenting with a Solana application inside Telegram.
+
+---
+
+## ✨ Current functionality
+
+The current implementation includes:
 
 | Feature | Description |
 |---|---|
-| 🔐 **Openfort Backend Wallets** | Create and manage Solana wallets through Openfort |
-| 🛡️ **Non-custodial user experience** | The bot does not receive or store users' Solana private keys |
-| 💱 **Jupiter Swaps** | Buy and sell supported tokens using Jupiter |
-| 💸 **SOL Withdrawals** | Send SOL to any valid Solana address |
-| ⛽ **Gasless Transactions** | Use Kora infrastructure for sponsored Solana transactions |
-| 📊 **Balance Checking** | View SOL and SPL token balances |
-| 💰 **Jupiter Referral** | Optional referral fee integration |
-| 🗄️ **SQLite** | Lightweight local persistence |
-| 🦀 **Rust** | Fast, safe and memory-efficient backend |
+| 🔐 Backend Wallets | Solana wallets implemented through Openfort Backend Wallet infrastructure |
+| 🔑 Remote transaction signing | The Telegram bot does not store users' private keys |
+| 💱 Jupiter swaps | Buy and sell supported Solana tokens through Jupiter |
+| ⛽ Gasless transactions | Gasless transaction flow using Kora |
+| 💸 SOL withdrawals | Withdraw SOL to an external Solana address |
+| 📊 Balance checking | View SOL and SPL token balances |
+| 💰 Jupiter referral integration | Optional swap monetization through Jupiter Referral |
+| 🛡️ Secret isolation | Sensitive wallet credentials are kept outside the application database |
 
 ---
 
-# 🤖 Telegram Commands
+## 🔐 Wallet architecture
 
-## Wallet
+The project uses **Openfort Backend Wallets**.
 
-### `/start`
+The important security property is that the Telegram bot itself does **not** store or directly manage users' private keys.
 
-Show the welcome message and available commands.
+The application stores the information required to associate a Telegram user with their Openfort account/wallet, while signing operations are delegated to Openfort's wallet infrastructure.
 
-### `/create_wallet`
+Conceptually:
 
-Create a new Solana Backend Wallet through Openfort.
+```text
+Telegram User
+      │
+      ▼
+Telegram Bot
+      │
+      │ wallet/account reference
+      ▼
+Openfort Backend Wallet
+      │
+      │ transaction signing
+      ▼
+Solana
+```
+
+> **Important:** This repository is an application integration example. Production deployments should independently evaluate their security model, access controls, authentication, rate limiting, transaction policies, and operational key management.
 
 ---
 
-## Balance
+## 🏗️ Architecture
 
-### `/balance`
-
-Show the user's SOL and supported SPL token balances.
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                         Telegram User                           │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        Telegram Bot API                         │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  Rust / Teloxide Application                    │
+│                                                                 │
+│  /start   /create_wallet   /balance   /buy   /sell   /withdraw │
+└───────────────┬───────────────────────┬─────────────────────────┘
+                │                       │
+                ▼                       ▼
+┌─────────────────────────┐   ┌───────────────────────────────────┐
+│   Application Modules   │   │       External Infrastructure     │
+│                         │   │                                   │
+│ balance/                │   │ Openfort Backend Wallets          │
+│ config/                 │   │ Jupiter API                      │
+│ db/                     │   │ Kora                              │
+│ jupiter/                │   │ Solana RPC                        │
+│ openfort/               │   │                                   │
+│ solana/                 │   └───────────────────────────────────┘
+│ withdraw/               │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│        SQLite           │
+│                         │
+│ User ↔ Wallet mapping   │
+│ Application state       │
+└─────────────────────────┘
+```
 
 ---
 
-## Swaps
+## 🔄 Main transaction flows
 
-### `/buy <token> <amount>`
+### Create wallet
 
-Buy a supported token using SOL.
+```text
+Telegram User
+      │
+      ▼
+/create_wallet
+      │
+      ▼
+Rust application
+      │
+      ▼
+Openfort Backend Wallet API
+      │
+      ▼
+Solana wallet/account
+      │
+      ▼
+Wallet address returned to user
+```
+
+### Token swap
+
+```text
+Telegram User
+      │
+      ▼
+/buy or /sell
+      │
+      ▼
+Jupiter
+      │
+      ▼
+Swap transaction
+      │
+      ▼
+Openfort transaction signing
+      │
+      ▼
+Solana
+```
+
+### SOL withdrawal
+
+```text
+Telegram User
+      │
+      ▼
+/withdraw
+      │
+      ▼
+Validate destination + amount
+      │
+      ▼
+Openfort Backend Wallet
+      │
+      ▼
+Kora gasless transaction flow
+      │
+      ▼
+Solana
+      │
+      ▼
+Transaction signature
+```
+
+---
+
+## 📋 Telegram commands
+
+| Command | Description |
+|---|---|
+| `/start` | Welcome message and available commands |
+| `/create_wallet` | Create a new Solana wallet |
+| `/balance` | Check SOL and token balances |
+| `/buy <token> <amount>` | Buy a supported token |
+| `/sell <token> <amount>` | Sell a supported token for SOL |
+| `/withdraw <amount> <address>` | Withdraw SOL to an external Solana address |
+
+### Buy
+
+```text
+/buy <token> <amount>
+```
 
 Example:
 
@@ -61,9 +312,11 @@ Example:
 /buy USDC 1
 ```
 
-### `/sell <token> <amount>`
+### Sell
 
-Sell a supported token for SOL.
+```text
+/sell <token> <amount>
+```
 
 Example:
 
@@ -78,296 +331,176 @@ Currently supported tokens include:
 - wBTC
 - wETH
 
-Swap routing and liquidity are provided by Jupiter.
+### Withdraw
 
----
-
-## Withdrawals
-
-### `/withdraw <amount> <address>`
-
-Withdraw SOL from the user's Openfort wallet to a Solana address.
+```text
+/withdraw <amount> <address>
+```
 
 Example:
 
 ```text
-/withdraw 0.1 7xKXtg2CW87d97TXJSDpbD5jBkheT...
-```
-
-The transaction is signed through the Openfort Backend Wallet infrastructure.
-
-When Kora sponsorship is configured, the transaction can be processed through a gasless flow where the configured fee payer covers the Solana network fee.
-
----
-
-# 🏗️ Architecture
-
-The bot is built around several independent components:
-
-```text
-┌──────────────────────────────────────────────┐
-│                  Telegram User               │
-└──────────────────────┬───────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────┐
-│               Telegram Bot API               │
-│                  Teloxide                    │
-└──────────────────────┬───────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────┐
-│                Rust Application              │
-│                                              │
-│  /start /create_wallet /balance              │
-│  /buy /sell /withdraw                        │
-└──────────────┬──────────────┬────────────────┘
-               │              │
-               ▼              ▼
-        ┌────────────┐   ┌────────────────────┐
-        │   SQLite   │   │   External APIs    │
-        │            │   │                    │
-        │ User state │   │ Openfort           │
-        │ Wallet IDs │   │ Jupiter            │
-        │ Addresses  │   │ Kora               │
-        └────────────┘   │ Solana RPC         │
-                         └────────────────────┘
+/withdraw 0.1 7xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ---
 
-# 🔐 Wallet Architecture
+## 🛠️ Tech stack
 
-This project uses **Openfort Backend Wallets** to provide wallet infrastructure without requiring the Telegram bot to handle users' Solana private keys.
-
-The basic architecture is:
-
-```text
-                    User
-                     │
-                     ▼
-              Telegram Bot
-                     │
-                     │ wallet operations
-                     ▼
-              ┌─────────────┐
-              │  Openfort   │
-              │   Backend   │
-              │   Wallet    │
-              └──────┬──────┘
-                     │
-                     │ signing
-                     ▼
-                  Solana
-```
-
-The application works with wallet/account identifiers and public addresses.
-
-The bot does not need to store:
-
-```text
-Solana private keys
-Seed phrases
-Recovery phrases
-```
-
-> **Important:** "Non-custodial" here refers to the bot not holding users' Solana private keys. Openfort Backend Wallets are managed wallet infrastructure, so developers should review Openfort's custody, security and policy model before using the system in production.
-
----
-
-# ⛽ Gasless Transactions with Kora
-
-The project supports Kora for gasless Solana transaction flows.
-
-A simplified flow looks like this:
-
-```text
-User
- │
- ▼
-Telegram Bot
- │
- ▼
-Openfort Backend Wallet
- │
- │ user transaction signature
- ▼
-Kora
- │
- │ fee payer / sponsorship
- ▼
-Solana RPC
- │
- ▼
-Solana Network
-```
-
-Kora can act as the transaction fee payer, allowing applications to sponsor Solana transaction fees for users.
-
-This can provide a much simpler user experience because users do not necessarily need to maintain SOL solely to pay transaction fees.
-
-> Gasless transaction availability depends on the configured Kora infrastructure, sponsorship policies and fee-payer configuration.
-
----
-
-# 💱 Jupiter Integration
-
-Token swaps are powered by Jupiter.
-
-The bot uses Jupiter to find swap routes and execute token swaps on Solana.
-
-Examples:
-
-```text
-SOL → USDC
-USDC → SOL
-
-SOL → USDT
-USDT → SOL
-
-SOL → wBTC
-wBTC → SOL
-
-SOL → wETH
-wETH → SOL
-```
-
-Jupiter provides swap routing and liquidity aggregation, while Openfort provides wallet signing infrastructure.
-
----
-
-# 💰 Jupiter Referral
-
-The project includes support for Jupiter referral fees.
-
-The current configuration uses:
-
-```text
-50 bps = 0.5%
-```
-
-Referral fees provide an optional monetization mechanism for applications built on top of Jupiter.
-
-Before deploying your own instance, configure your own referral account and review the current Jupiter referral requirements.
-
----
-
-# 🦀 Tech Stack
-
-| Technology | Purpose |
+| Technology | Role |
 |---|---|
-| **Rust** | Application backend |
+| **Rust** | Application and backend logic |
 | **Teloxide** | Telegram Bot framework |
-| **Solana** | Blockchain |
+| **Solana SDK** | Solana blockchain interaction |
 | **Openfort** | Backend Wallet infrastructure and transaction signing |
+| **Jupiter** | Token swap and liquidity aggregation |
 | **Kora** | Gasless transaction infrastructure |
-| **Jupiter** | Swap routing and liquidity |
-| **SQLite** | Local persistence |
-| **Reqwest** | HTTP API communication |
-| **Serde** | Serialization and deserialization |
+| **SQLite** | Persistent local application state |
+| **Reqwest** | HTTP communication |
+| **Serde** | Serialization and API models |
 
 ---
 
-# 📁 Project Structure
+## 🚀 Quick Start
 
-```text
-src/
-├── balance/
-│   └── ...
-├── config/
-│   └── ...
-├── crypto/
-│   └── ...
-├── db/
-│   └── ...
-├── jupiter/
-│   └── ...
-├── openfort/
-│   └── ...
-├── solana/
-│   └── ...
-├── withdraw/
-│   └── ...
-└── main.rs
-```
-
-The project separates Telegram command handling, blockchain logic, wallet infrastructure and persistence so individual components can be extended or replaced independently.
-
----
-
-# 🚀 Quick Start
-
-## Requirements
-
-Before running the bot, make sure you have:
-
-- Rust
-- Cargo
-- A Telegram Bot Token
-- An Openfort account
-- Openfort API credentials
-- A Solana RPC endpoint
-- Jupiter configuration
-- Kora configuration if you want to use gasless transactions
-
----
-
-## 1. Clone the repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/MrMaksMaksMaks/Starter-kit-bot.git
 cd Starter-kit-bot
 ```
 
----
-
-## 2. Configure environment variables
-
-Copy the example environment file:
+### 2. Create your environment file
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and configure your credentials.
+Fill in the required environment variables in `.env`.
 
-Example:
+Depending on the enabled functionality, this includes credentials for:
 
-```dotenv
-TELEGRAM_BOT_TOKEN=...
+- Telegram Bot API;
+- Openfort;
+- Jupiter;
+- Kora;
+- Solana RPC.
 
-OPENFORT_SECRET_KEY=...
-OPENFORT_WALLET_SECRET=...
+Do not commit your `.env` file.
 
-SOLANA_RPC_URL=...
+### 3. Build the project
 
-JUPITER_API_KEY=...
-
-DATABASE_URL=...
+```bash
+cargo build --release
 ```
 
-Use the `.env.example` file in the repository as the source of truth for the complete list of supported environment variables.
+### 4. Run the bot
 
-### Never commit secrets
-
-Do not commit:
-
-```text
-.env
-private keys
-API keys
-Openfort secrets
-Telegram bot tokens
-database files containing sensitive application data
+```bash
+cargo run
 ```
 
-Make sure `.env` is included in `.gitignore`.
+For a production build:
+
+```bash
+./target/release/<binary-name>
+```
 
 ---
 
-## 3. Build the project
+## 🔧 Configuration
 
-For a release build:
+Configuration is provided through environment variables.
+
+See:
+
+```text
+.env.example
+```
+
+for the variables required by the current implementation.
+
+Keep all secrets outside the repository and make sure `.env` is excluded by `.gitignore`.
+
+---
+
+## 💰 Jupiter Referral / Monetization
+
+The bot includes integration with the **Jupiter Referral** mechanism.
+
+The current configuration uses a **50 bps (0.5%)** swap commission.
+
+The purpose of this integration is to demonstrate how developers building on top of this starter kit can add an optional and transparent revenue mechanism while keeping the core project open source.
+
+For developers using the repository as a foundation, the referral configuration can be replaced or removed according to their own application model.
+
+---
+
+## 🔒 Security
+
+Security is a core design consideration of the project.
+
+### Private keys
+
+The Telegram bot does not store users' private keys in SQLite or in the application source code.
+
+Transaction signing is delegated to Openfort Backend Wallet infrastructure.
+
+### Environment secrets
+
+Sensitive credentials must be provided through environment variables.
+
+Never commit:
+
+```text
+.env
+```
+
+or any file containing production credentials.
+
+### Production considerations
+
+This repository is a starter kit and should not be considered a complete production security framework.
+
+Before deploying a production application, developers should consider:
+
+- Telegram user authentication and authorization;
+- withdrawal limits;
+- address validation;
+- rate limiting;
+- replay protection;
+- transaction simulation;
+- audit logging;
+- error handling;
+- monitoring and alerting;
+- Openfort access policies;
+- RPC reliability;
+- database backups;
+- secret rotation.
+
+---
+
+## 🧪 Development
+
+Check the project:
+
+```bash
+cargo check
+```
+
+Format Rust code:
+
+```bash
+cargo fmt
+```
+
+Run Clippy:
+
+```bash
+cargo clippy
+```
+
+Build a release version:
 
 ```bash
 cargo build --release
@@ -375,316 +508,287 @@ cargo build --release
 
 ---
 
-## 4. Run the bot
+## 🗺️ Roadmap
 
-```bash
-cargo run --release
-```
-
-For development:
-
-```bash
-cargo run
-```
-
----
-
-# 🧪 Development
-
-## Format the code
-
-```bash
-cargo fmt
-```
-
-Check formatting:
-
-```bash
-cargo fmt --check
-```
-
----
-
-## Run Clippy
-
-```bash
-cargo clippy
-```
-
-For stricter CI-style checking:
-
-```bash
-cargo clippy --all-targets --all-features -- -D warnings
-```
-
----
-
-## Run tests
-
-```bash
-cargo test
-```
-
----
-
-# 🌐 Solana Networks
-
-The project is intended to support Solana development and production deployments.
-
-For development and testing, use:
-
-```text
-Solana Devnet
-```
-
-For production:
-
-```text
-Solana Mainnet-beta
-```
-
-Make sure that your Openfort, Kora, Jupiter and RPC configurations are targeting the same intended network.
-
----
-
-# 🔒 Security
-
-Security is especially important because the bot can initiate blockchain transactions.
-
-The intended architecture avoids storing users' Solana private keys inside the bot database.
-
-The application can store information such as:
-
-```text
-Telegram user ID
-Openfort account ID
-Solana public address
-Application state
-```
-
-It should not store:
-
-```text
-Solana private keys
-Seed phrases
-Recovery phrases
-```
-
-## Production recommendations
-
-Before deploying the bot with real funds, consider implementing:
-
-- withdrawal limits;
-- per-user rate limiting;
-- destination address validation;
-- transaction idempotency;
-- transaction audit logs;
-- Openfort wallet policies;
-- Kora spending and sponsorship limits;
-- secure secret management;
-- separate devnet and mainnet credentials;
-- RPC failover;
-- monitoring and alerting;
-- database backups;
-- administrator controls;
-- emergency transaction controls.
-
----
-
-# ⚠️ Production Warning
-
-This repository is a **starter kit** and should not be considered a complete production-ready financial infrastructure platform.
-
-Before handling significant real-world funds:
-
-1. Test all transaction flows on Solana Devnet.
-2. Review the Openfort Backend Wallet configuration.
-3. Configure appropriate Openfort policies.
-4. Configure Kora sponsorship and spending limits.
-5. Add application-level withdrawal limits.
-6. Validate destination addresses.
-7. Implement proper error handling and transaction retry logic.
-8. Secure all API credentials.
-9. Add monitoring and alerting.
-10. Perform an independent security review.
-
-Do not assume that using an external wallet infrastructure provider eliminates the need for application-level security controls.
-
----
-
-# 🗺️ Roadmap
-
-## ✅The core functionality is already implemented:
+### ✅ Already implemented
 
 - [x] Telegram Bot
 - [x] Openfort Backend Wallet creation
-- [x] Solana wallet management
-- [x] SOL balance
-- [x] SPL token balance
+- [x] SOL and SPL token balances
 - [x] Jupiter swaps
 - [x] SOL withdrawals
-- [x] Kora transaction flow
+- [x] Kora gasless transactions
 - [x] SQLite persistence
 - [x] Jupiter referral support
 
-## 🚀 Short-term (next 3 months)
+### 🚀 Short-term (3 months)
 
-- [ ] **Transaction history** — view all user swaps and withdrawals
-- [ ] **Inline keyboard UI** — better UX with buttons instead of text commands
-- [ ] **More SPL tokens** — support for popular tokens (JUP, RAY, etc.)
-- [ ] **Token metadata & logos** — display token icons and names
-- [ ] **Security audit** — external security review of the codebase
+- [ ] Transaction history
+- [ ] Inline keyboard UI
+- [ ] More SPL tokens
+- [ ] Token metadata & logos
+- [ ] Security audit
 
-## 🎯 Medium-term (3-6 months)
+### 🎯 Medium-term (3-6 months)
 
-- [ ] **Limit orders** — set buy/sell orders at specific prices
-- [ ] **DCA (Dollar-Cost Averaging)** — automate periodic purchases
-- [ ] **Advanced withdrawal protection** — whitelist addresses, daily limits
+- [ ] Limit orders
+- [ ] DCA (Dollar-Cost Averaging)
+- [ ] Advanced withdrawal protection
 
-## 🏆 Long-term (6+ months)
+### 🏆 Long-term (6+ months)
 
-- [ ] **Token sniping** — automatic purchase of new tokens at launch
-- [ ] **Copy trading** — follow and replicate trades of successful wallets
-- [ ] **Production deployment guide** — comprehensive guide for deploying the bot
-- [ ] **Integration tests** — full test suite for all commands and flows
+- [ ] Token sniping
+- [ ] Copy trading
+- [ ] Production deployment guide
+- [ ] Integration tests
+
+The roadmap is focused on turning the current working reference implementation into a more complete and production-oriented foundation for Telegram-native Solana applications.
 
 ---
 
-# 🤝 Contributing
+## 🌱 Open-source public good
+
+The project is released as open source so that the implementation itself can become useful infrastructure for other builders.
+
+The intended value to the Solana ecosystem is not limited to the bot described in this repository.
+
+A developer should be able to take this project and turn it into:
+
+- a trading assistant;
+- a community bot;
+- a DeFi interface;
+- a payment bot;
+- a portfolio assistant;
+- a game economy;
+- or another Telegram-native Solana application.
+
+The common infrastructure — wallet integration, transaction signing, swaps, withdrawals, and Solana interaction — should not need to be rebuilt from zero every time.
+
+---
+
+## 🤝 Contributing
 
 Contributions are welcome.
 
-You can contribute by:
+If you find a bug, have an improvement, or want to add another Solana integration:
 
-- reporting bugs;
-- opening issues;
-- improving documentation;
-- submitting pull requests;
-- improving security;
-- adding tests;
-- adding new Solana integrations;
-- improving the Telegram UX.
+1. Fork the repository.
+2. Create a feature branch.
+3. Make your changes.
+4. Run formatting and checks.
+5. Open a pull request.
 
-Before submitting a pull request, run:
+Example:
 
 ```bash
+git checkout -b feature/my-feature
 cargo fmt
-cargo clippy
-cargo test
+cargo check
+git commit -m "Add my feature"
+git push origin feature/my-feature
 ```
 
 ---
 
-# 📜 License
+## 📄 License
 
-MIT License
+MIT License.
 
-Copyright © 2026
-
----
-
-# ⭐ Why this project?
-
-Building a Telegram-based Solana application usually requires combining several independent pieces of infrastructure:
-
-```text
-Telegram
-   +
-Wallet infrastructure
-   +
-Transaction signing
-   +
-Solana RPC
-   +
-Swap aggregation
-   +
-Gas sponsorship
-   +
-Database
-```
-
-This project brings those components together into one Rust starter kit.
-
-The goal is simple:
-
-> **Clone it, configure your infrastructure, run it, and start building your own Solana Telegram application.**
+Copyright © 2026.
 
 ---
 
-# 🔗 Ecosystem
+## ⭐ Support the project
 
-- [Solana](https://solana.com/)
-- [Openfort](https://www.openfort.io/)
-- [Jupiter](https://jup.ag/)
-- [Kora](https://github.com/solana-foundation/kora)
-- [Teloxide](https://github.com/teloxide/teloxide)
+If this starter kit is useful to you:
 
----
+- ⭐ Star the repository;
+- fork it;
+- build something on Solana;
+- open an issue with feedback;
+- contribute improvements;
+- share what you build with the community.
 
-# 🇷🇺 Русский
-
-# Solana Starter Kit Bot 🤖
-
-**Open-source starter kit для создания Telegram-ботов на Solana с использованием Rust.**
-
-Проект объединяет:
-
-- 🔐 Openfort Backend Wallet
-- 💱 Jupiter для обмена токенов
-- ⛽ Kora для gasless-транзакций
-- 💸 вывод SOL
-- 📊 баланс SOL и SPL-токенов
-- 💰 Jupiter Referral
-- 🗄️ SQLite
-- 🦀 Rust + Teloxide
-
-Цель проекта — предоставить готовую основу для разработчиков, которые хотят создавать Telegram-приложения с Solana-кошельками, обменом токенов и DeFi-функциональностью.
+**The goal is simple: make it easier for more developers to build useful applications on Solana.**
 
 ---
 
-## ✨ Возможности
+# 🇷🇺 Русская версия
+
+## 🎯 Зачем нужен этот проект?
+
+Создание Telegram-приложения, которое взаимодействует с Solana, требует интеграции нескольких компонентов:
+
+- создание и управление кошельками;
+- безопасная подпись транзакций;
+- взаимодействие с Solana RPC;
+- обмен токенов и маршрутизация ликвидности;
+- спонсирование транзакций;
+- хранение состояния пользователей;
+- инфраструктура Telegram-бота.
+
+Для отдельного разработчика или небольшой команды эта инфраструктурная работа может стать серьёзным барьером ещё до того, как будет проверена сама идея приложения.
+
+**Solana Starter Kit Bot создан для снижения этого барьера.**
+
+Репозиторий представляет собой рабочую open-source реализацию, объединяющую:
+
+- **Openfort Backend Wallets** — инфраструктуру кошельков и подпись транзакций;
+- **Jupiter** — обмен токенов и агрегацию ликвидности;
+- **Kora** — gasless-транзакции;
+- **Solana RPC** — взаимодействие с блокчейном;
+- **Rust + Teloxide** — уровень Telegram-приложения;
+- **SQLite** — хранение состояния приложения.
+
+Цель проекта — предоставить не закрытого торгового бота, а **переиспользуемую основу**, которую другие разработчики могут форкнуть, изучить, изменить и использовать для собственных Solana-приложений.
+
+### Проблема в одном предложении
+
+> **Разработчик должен иметь возможность быстро экспериментировать с Telegram-native приложениями на Solana, не создавая с нуля всю инфраструктуру кошельков и транзакций.**
+
+---
+
+## ☀️ Почему Solana?
+
+Главная идея проекта — сделать взаимодействие с блокчейном таким же простым для пользователя, как взаимодействие с обычным Telegram-ботом.
+
+Для этого нужны:
+
+- быстрые транзакции;
+- низкая стоимость операций;
+- развитая экосистема токенов и DeFi;
+- современная инфраструктура для спонсирования транзакций.
+
+Solana особенно хорошо подходит под такой сценарий.
+
+### ⚡ Быстрые и недорогие операции
+
+Telegram-приложение может выполнять много небольших и частых blockchain-операций.
+
+Пользователь может проверять баланс, обменивать токены, выводить средства и выполнять другие действия прямо из интерфейса Telegram.
+
+Поэтому высокая производительность и низкая стоимость транзакций особенно важны для такого UX.
+
+### 💱 Экосистема DeFi
+
+Проект использует **Jupiter** для обмена токенов.
+
+Это позволяет использовать существующую инфраструктуру ликвидности Solana вместо того, чтобы каждому разработчику самостоятельно реализовывать маршрутизацию и поиск ликвидности.
+
+### ⛽ Gasless-транзакции
+
+Одна из проблем blockchain UX — необходимость держать нативный токен только для оплаты комиссии.
+
+Проект интегрирует **Kora** для поддержки gasless-транзакций.
+
+Вместе с Openfort Backend Wallet это позволяет создавать сценарии, в которых управление комиссией может быть скрыто от пользователя.
+
+### 🧩 Экосистема разработчика
+
+Для такого приложения уже существует необходимая инфраструктура:
+
+- Solana RPC;
+- Jupiter;
+- Kora;
+- Openfort;
+- Rust-инструменты;
+- большая экосистема токенов и DeFi.
+
+Этот проект объединяет эти компоненты в одну понятную рабочую реализацию.
+
+### Почему именно Solana?
+
+Проект намеренно является **Solana-first**.
+
+Цель — не создать абстрактный multi-chain wallet framework, а упростить создание именно **Telegram-native приложений для Solana**.
+
+Сочетание низкой стоимости транзакций, производительности, развитой DeFi-экосистемы и инфраструктуры gasless-транзакций делает Solana сильной платформой для такого сценария.
+
+---
+
+## 🌐 Вклад в экосистему Solana
+
+Проект задуман как **open-source public good для разработчиков Solana**.
+
+Основная идея — сделать рабочую интеграцию доступной другим разработчикам, чтобы они могли:
+
+- изучать реализацию;
+- использовать её как reference implementation;
+- делать fork;
+- заменять отдельные компоненты;
+- добавлять собственную бизнес-логику;
+- создавать новые Telegram-native приложения.
+
+Ценность проекта заключается не только в самом боте.
+
+Одна и та же инфраструктура может стать основой для:
+
+- trading assistants;
+- community bots;
+- DeFi-интерфейсов;
+- payment bots;
+- portfolio assistants;
+- игровых экономик;
+- других Telegram-приложений на Solana.
+
+---
+
+## ✨ Текущий функционал
+
+На данный момент реализованы:
 
 | Возможность | Описание |
 |---|---|
-| 🔐 **Openfort Backend Wallet** | Создание и управление Solana-кошельками через Openfort |
-| 🛡️ **Non-custodial user experience** | Telegram-бот не получает и не хранит private keys пользователей |
-| 💱 **Jupiter Swap** | Покупка и продажа поддерживаемых токенов |
-| 💸 **Вывод SOL** | Отправка SOL на указанный Solana-адрес |
-| ⛽ **Gasless Transactions** | Использование Kora для спонсируемых транзакций |
-| 📊 **Баланс** | Просмотр SOL и SPL-токенов |
-| 💰 **Jupiter Referral** | Возможность использовать referral fees |
-| 🗄️ **SQLite** | Локальное хранение состояния приложения |
-| 🦀 **Rust** | Производительный и безопасный backend |
+| 🔐 Backend Wallets | Solana-кошельки через Openfort Backend Wallet |
+| 🔑 Удалённая подпись | Бот не хранит приватные ключи пользователей |
+| 💱 Jupiter Swap | Покупка и продажа поддерживаемых токенов |
+| ⛽ Gasless transactions | Gasless flow через Kora |
+| 💸 Вывод SOL | Вывод SOL на внешний Solana-адрес |
+| 📊 Балансы | Просмотр SOL и SPL-токенов |
+| 💰 Jupiter Referral | Реферальная монетизация обменов |
+| 🛡️ Разделение секретов | Чувствительные credentials не хранятся в базе |
 
 ---
 
-# 🤖 Telegram-команды
+## 🔐 Архитектура кошелька
 
-## Кошелёк
+Проект использует **Openfort Backend Wallets**.
 
-### `/start`
+Ключевое свойство архитектуры: Telegram-бот сам **не хранит и напрямую не управляет приватными ключами пользователей**.
 
-Показывает приветственное сообщение и доступные команды.
+Приложение хранит информацию, необходимую для связи Telegram-пользователя с его Openfort account/wallet, а операции подписи делегируются инфраструктуре Openfort.
 
-### `/create_wallet`
+Концептуально:
 
-Создаёт новый Solana Backend Wallet через Openfort.
+```text
+Пользователь Telegram
+        │
+        ▼
+Telegram Bot
+        │
+        │ ссылка на wallet/account
+        ▼
+Openfort Backend Wallet
+        │
+        │ подпись транзакции
+        ▼
+Solana
+```
+
+> **Важно:** этот репозиторий является примером интеграции. Перед production-развёртыванием необходимо отдельно оценить модель безопасности, контроль доступа, аутентификацию, rate limiting, политики транзакций и управление ключевой инфраструктурой.
 
 ---
 
-## Баланс
+## 📋 Команды
 
-### `/balance`
-
-Показывает баланс SOL и поддерживаемых SPL-токенов.
-
----
-
-## Обмен токенов
-
-### `/buy <token> <amount>`
-
-Покупка токена за SOL.
+| Команда | Описание |
+|---|---|
+| `/start` | Приветствие и доступные команды |
+| `/create_wallet` | Создание нового Solana-кошелька |
+| `/balance` | Проверка SOL и токенов |
+| `/buy <token> <amount>` | Покупка поддерживаемого токена |
+| `/sell <token> <amount>` | Продажа поддерживаемого токена за SOL |
+| `/withdraw <amount> <address>` | Вывод SOL на внешний Solana-адрес |
 
 Пример:
 
@@ -692,296 +796,42 @@ The goal is simple:
 /buy USDC 1
 ```
 
-### `/sell <token> <amount>`
-
-Продажа токена за SOL.
-
-Пример:
-
 ```text
 /sell USDC 1
 ```
 
-Поддерживаемые токены:
-
-- USDC
-- USDT
-- wBTC
-- wETH
-
-Маршрутизация обмена выполняется через Jupiter.
-
----
-
-## Вывод SOL
-
-### `/withdraw <amount> <address>`
-
-Вывод SOL на указанный Solana-адрес.
-
-Пример:
-
 ```text
-/withdraw 0.1 7xKXtg2CW87d97TXJSDpbD5jBkheT...
-```
-
-Транзакция подписывается через Openfort Backend Wallet.
-
-При настроенной Kora sponsorship-инфраструктуре транзакция может выполняться в gasless-режиме.
-
----
-
-# 🔐 Архитектура кошелька
-
-Проект использует **Openfort Backend Wallet**.
-
-Главный принцип:
-
-> **Telegram-бот не получает и не хранит приватные ключи Solana пользователей.**
-
-Упрощённая архитектура:
-
-```text
-                    Пользователь
-                         │
-                         ▼
-                  Telegram Bot
-                         │
-                         ▼
-                   Openfort API
-                         │
-                         ▼
-               ┌──────────────────┐
-               │ Openfort Backend │
-               │      Wallet      │
-               └────────┬─────────┘
-                        │
-                     signing
-                        │
-                        ▼
-                     Solana
-```
-
-В приложении используются:
-
-```text
-Telegram user ID
-Openfort account ID
-Solana public address
-Application state
-```
-
-В базе не должны храниться:
-
-```text
-Solana private key
-Seed phrase
-Recovery phrase
-```
-
-> **Важно:** термин "non-custodial" в данном README означает, что Telegram-бот не владеет и не хранит private keys пользователей. Backend Wallet является управляемой wallet-инфраструктурой, поэтому перед production deployment необходимо самостоятельно изучить модель custody, security и policies Openfort.
-
----
-
-# ⛽ Kora
-
-Kora используется для реализации gasless Solana transaction flows.
-
-Упрощённый процесс:
-
-```text
-Telegram Bot
-     │
-     ▼
-Openfort Backend Wallet
-     │
-     │ signature
-     ▼
-    Kora
-     │
-     │ fee payer
-     ▼
- Solana RPC
-     │
-     ▼
-  Solana
-```
-
-Kora может выступать в качестве fee payer и оплачивать комиссию Solana за пользователя.
-
-Это позволяет создавать UX, в котором пользователю не обязательно заранее иметь SOL исключительно для оплаты network fees.
-
-> Возможность gasless-транзакций зависит от настроек Kora, sponsorship policy и fee payer configuration.
-
----
-
-# 💱 Jupiter
-
-Jupiter используется для маршрутизации swap-транзакций и доступа к ликвидности Solana.
-
-Примеры:
-
-```text
-SOL → USDC
-USDC → SOL
-
-SOL → USDT
-USDT → SOL
-
-SOL → wBTC
-wBTC → SOL
-
-SOL → wETH
-wETH → SOL
-```
-
-Jupiter отвечает за routing и liquidity aggregation, а Openfort — за wallet signing.
-
----
-
-# 💰 Jupiter Referral
-
-В проекте предусмотрена интеграция Jupiter Referral.
-
-Текущая конфигурация:
-
-```text
-50 bps
-=
-0.5%
-```
-
-Referral fees могут использоваться как механизм монетизации приложения.
-
-Перед запуском собственной production-инсталляции необходимо настроить собственный referral account и проверить актуальные требования Jupiter.
-
----
-
-# 🦀 Технологии
-
-- **Rust** — backend
-- **Teloxide** — Telegram Bot framework
-- **Solana** — blockchain
-- **Openfort** — Backend Wallet и transaction signing
-- **Kora** — gasless transaction infrastructure
-- **Jupiter** — swap routing и liquidity
-- **SQLite** — database
-- **Reqwest** — HTTP
-- **Serde** — serialization
-
----
-
-# 📁 Структура проекта
-
-```text
-src/
-├── balance/
-│   └── ...
-├── config/
-│   └── ...
-├── crypto/
-│   └── ...
-├── db/
-│   └── ...
-├── jupiter/
-│   └── ...
-├── openfort/
-│   └── ...
-├── solana/
-│   └── ...
-├── withdraw/
-│   └── ...
-└── main.rs
+/withdraw 0.1 <SOLANA_ADDRESS>
 ```
 
 ---
 
-# 🚀 Быстрый старт
+## 🚀 Быстрый старт
 
-## Требования
-
-Для запуска понадобятся:
-
-- Rust
-- Cargo
-- Telegram Bot Token
-- Openfort account
-- Openfort API credentials
-- Solana RPC
-- Jupiter configuration
-- Kora configuration — если необходимы gasless-транзакции
-
----
-
-## 1. Клонирование репозитория
+### 1. Клонирование репозитория
 
 ```bash
 git clone https://github.com/MrMaksMaksMaks/Starter-kit-bot.git
 cd Starter-kit-bot
 ```
 
----
-
-## 2. Настройка переменных окружения
-
-Скопируй пример конфигурации:
+### 2. Настройка переменных окружения
 
 ```bash
 cp .env.example .env
 ```
 
-Открой `.env` и укажи необходимые значения.
+Заполните необходимые переменные в `.env`.
 
-Пример:
+Не добавляйте `.env` в Git.
 
-```dotenv
-TELEGRAM_BOT_TOKEN=...
-
-OPENFORT_SECRET_KEY=...
-OPENFORT_WALLET_SECRET=...
-
-SOLANA_RPC_URL=...
-
-JUPITER_API_KEY=...
-
-DATABASE_URL=...
-```
-
-Полный список переменных необходимо смотреть в актуальном `.env.example` репозитория.
-
-### Никогда не публикуй секреты
-
-Не добавляй в Git:
-
-```text
-.env
-private keys
-API keys
-Openfort secrets
-Telegram bot tokens
-```
-
-Убедись, что `.env` находится в `.gitignore`.
-
----
-
-## 3. Сборка
-
-Для production build:
+### 3. Сборка
 
 ```bash
 cargo build --release
 ```
 
----
-
-## 4. Запуск
-
-```bash
-cargo run --release
-```
-
-Для разработки:
+### 4. Запуск
 
 ```bash
 cargo run
@@ -989,225 +839,99 @@ cargo run
 
 ---
 
-# 🧪 Разработка
+## 🔒 Безопасность
 
-Форматирование:
+Telegram-бот не хранит приватные ключи пользователей в SQLite или исходном коде.
 
-```bash
-cargo fmt
-```
+Подпись транзакций выполняется через инфраструктуру Openfort Backend Wallet.
 
-Проверка форматирования:
+Секретные данные передаются через environment variables.
 
-```bash
-cargo fmt --check
-```
+Перед production-развёртыванием необходимо самостоятельно обеспечить:
 
-Clippy:
-
-```bash
-cargo clippy
-```
-
-Строгая проверка:
-
-```bash
-cargo clippy --all-targets --all-features -- -D warnings
-```
-
-Тесты:
-
-```bash
-cargo test
-```
-
----
-
-# 🌐 Сети Solana
-
-Для разработки рекомендуется использовать:
-
-```text
-Solana Devnet
-```
-
-Для production:
-
-```text
-Solana Mainnet-beta
-```
-
-Openfort, Kora, Jupiter и Solana RPC должны быть настроены на соответствующую сеть.
-
----
-
-# 🔒 Безопасность
-
-Проект построен таким образом, чтобы Telegram-бот не хранил private keys пользователей.
-
-Приложение может хранить:
-
-```text
-Telegram user ID
-Openfort account ID
-Solana public address
-Application state
-```
-
-Не должно хранить:
-
-```text
-Solana private key
-Seed phrase
-Recovery phrase
-```
-
-## Рекомендации для production
-
-Перед использованием реальных средств рекомендуется реализовать:
-
+- контроль доступа;
 - лимиты на вывод;
+- валидацию адресов;
 - rate limiting;
-- проверку destination address;
-- transaction idempotency;
-- audit logs;
-- Openfort policies;
-- Kora spending limits;
-- безопасное хранение secrets;
-- отдельные devnet/mainnet credentials;
-- RPC failover;
-- monitoring;
-- alerting;
-- database backups;
-- административные ограничения;
-- emergency controls.
+- мониторинг;
+- аудит операций;
+- безопасное хранение секретов;
+- резервное копирование;
+- политики доступа Openfort.
 
 ---
 
-# ⚠️ Перед использованием реальных средств
+## 🗺️ Roadmap
 
-Этот репозиторий является **starter kit**, а не полностью готовой финансовой инфраструктурой.
+### ✅ Уже реализовано
 
-Перед production deployment:
-
-1. Протестируй все операции в Solana Devnet.
-2. Проверь Openfort Backend Wallet configuration.
-3. Настрой Openfort policies.
-4. Настрой Kora sponsorship и spending limits.
-5. Добавь application-level withdrawal limits.
-6. Добавь проверку адресов.
-7. Проверь обработку ошибок.
-8. Защити все API credentials.
-9. Добавь monitoring и alerting.
-10. Проведи security review.
-
-Использование внешней wallet-инфраструктуры не отменяет необходимости защищать само приложение.
-
----
-
-# 🗺️ Дорожная карта
-
-## ✅ Уже реализовано
-
-- [x] Telegram бот
+- [x] Telegram Bot
 - [x] Создание Openfort Backend Wallet
-- [x] Управление Solana-кошельком
-- [x] Баланс SOL
-- [x] Баланс SPL-токенов
-- [x] Jupiter свопы
+- [x] Балансы SOL и SPL-токенов
+- [x] Jupiter swaps
 - [x] Вывод SOL
-- [x] Kora gasless транзакции
+- [x] Kora gasless transactions
 - [x] SQLite persistence
 - [x] Jupiter referral support
 
-## 🚀 Ближайшие планы (3 месяца)
+### 🚀 Краткосрочные цели (3 месяца)
 
-- [ ] **История транзакций** — просмотр всех свопов и выводов пользователя
-- [ ] **Инлайн-клавиатура** — улучшенный UX с кнопками вместо текстовых команд
-- [ ] **Поддержка большего количества SPL-токенов** — популярные токены (JUP, RAY и др.)
-- [ ] **Метаданные и логотипы токенов** — отображение иконок и названий токенов
-- [ ] **Аудит безопасности** — внешняя проверка безопасности кодовой базы
+- [ ] История транзакций
+- [ ] Inline keyboard UI
+- [ ] Поддержка большего количества SPL-токенов
+- [ ] Метаданные токенов и логотипы
+- [ ] Security audit
 
-## 🎯 Среднесрочные планы (3–6 месяцев)
+### 🎯 Среднесрочные цели (3–6 месяцев)
 
-- [ ] **Лимитные ордера** — установка ордеров на покупку/продажу по заданной цене
-- [ ] **DCA (усреднение цены)** — автоматическая периодическая покупка
-- [ ] **Расширенная защита вывода** — белый список адресов, дневные лимиты
+- [ ] Limit orders
+- [ ] DCA (Dollar-Cost Averaging)
+- [ ] Расширенная защита вывода средств
 
-## 🏆 Долгосрочные планы (6+ месяцев)
+### 🏆 Долгосрочные цели (6+ месяцев)
 
-- [ ] **Снайпинг токенов** — автоматическая покупка новых токенов при запуске
-- [ ] **Копитрейдинг** — отслеживание и повторение сделок успешных кошельков
-- [ ] **Руководство по production-развертыванию** — полное руководство по деплою бота
-- [ ] **Интеграционные тесты** — полный набор тестов для всех команд и сценариев
+- [ ] Token sniping
+- [ ] Copy trading
+- [ ] Production deployment guide
+- [ ] Integration tests
+
+Цель roadmap — превратить уже работающую reference implementation в более полноценную и production-oriented основу для Telegram-native приложений на Solana.
 
 ---
 
-# 🤝 Contributing
+## 🤝 Вклад в проект
 
-Contributions are welcome.
-
-Можно помочь проекту через:
-
-- Bug reports
-- Issues
-- Pull Requests
-- Улучшение документации
-- Security improvements
-- Новые Solana integrations
-- Tests
-- Улучшение Telegram UX
-
-Перед созданием Pull Request:
+Pull requests и предложения по улучшению приветствуются.
 
 ```bash
+git checkout -b feature/my-feature
 cargo fmt
-cargo clippy
-cargo test
+cargo check
+git commit -m "Add my feature"
+git push origin feature/my-feature
 ```
 
----
-
-# 📜 License
-
-MIT License
-
-Copyright © 2026
+После этого создайте Pull Request.
 
 ---
 
-# ⭐ Почему этот проект?
+## 📄 Лицензия
 
-Для создания полноценного Solana DeFi-приложения внутри Telegram обычно необходимо объединить несколько компонентов:
+MIT License.
 
-```text
-Telegram
-   +
-Wallet infrastructure
-   +
-Transaction signing
-   +
-Solana RPC
-   +
-Swap aggregation
-   +
-Gas sponsorship
-   +
-Database
-```
-
-Этот проект объединяет их в один Rust starter kit.
-
-Цель проекта:
-
-> **Склонировать → настроить инфраструктуру → запустить → начать создавать своё Solana-приложение в Telegram.**
+Copyright © 2026.
 
 ---
 
-# 🔗 Ecosystem
+## ⭐ Поддержать проект
 
-- [Solana](https://solana.com/)
-- [Openfort](https://www.openfort.io/)
-- [Jupiter](https://jup.ag/)
-- [Kora](https://github.com/solana-foundation/kora)
-- [Teloxide](https://github.com/teloxide/teloxide)
+Если проект оказался полезен:
+
+- ⭐ поставьте Star;
+- сделайте fork;
+- создайте собственное приложение на Solana;
+- предложите улучшения;
+- отправьте Pull Request;
+- расскажите сообществу о том, что построили.
+
+**Цель проекта — сделать создание полезных Telegram-native приложений на Solana проще для большего числа разработчиков.**
