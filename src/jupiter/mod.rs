@@ -1,4 +1,4 @@
-//! Модуль для работы с Jupiter API v2
+//! Jupiter API v2 module
 
 use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
@@ -25,8 +25,8 @@ pub struct OrderResponse {
     pub platform_fee: Option<PlatformFee>,
     pub error_code: Option<i32>,
     pub error_message: Option<String>,
-    // Jupiter присылает это как строку (в кавычках), не число — подтверждено
-    // реальным mainnet-ответом
+    // Jupiter sends this as a string (in quotes), not a number — confirmed
+    // by real mainnet response
     pub last_valid_block_height: Option<String>,
     pub in_amount: Option<String>,
     pub swap_mode: Option<String>,
@@ -35,8 +35,8 @@ pub struct OrderResponse {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformFee {
-    // Подтверждено реальным ответом: поле отсутствует, когда feeBps небольшой —
-    // Jupiter не всегда его присылает
+    // Confirmed by real response: field is missing when feeBps is small —
+    // Jupiter doesn't always include it
     pub amount: Option<String>,
     pub fee_bps: u16,
     pub fee_mint: String,
@@ -55,9 +55,9 @@ pub struct ExecuteResponse {
     pub error: Option<String>,
 }
 
-/// Известные mint-адреса токенов на mainnet.
-/// Адреса сверены с несколькими независимыми источниками (Tether, Phantom,
-/// Solana Explorer) после того, как в USDT нашлась опечатка.
+/// Known token mint addresses on mainnet.
+/// Addresses have been cross-checked with multiple independent sources (Tether, Phantom,
+/// Solana Explorer) after finding a typo in USDT.
 pub mod tokens {
     pub const SOL: &str = "So11111111111111111111111111111111111111112";
     pub const USDC: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
@@ -68,8 +68,8 @@ pub mod tokens {
     pub const WETH: &str = "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs";
 }
 
-/// Резолвит символ (SOL/USDC/USDT/wBTC/wETH, регистронезависимо) в mint-адрес,
-/// либо возвращает вход как есть — считаем, что это уже сырой mint-адрес
+/// Resolves a symbol (SOL/USDC/USDT/wBTC/wETH, case-insensitive) to a mint address,
+/// or returns the input as-is — assuming it's already a raw mint address
 pub fn resolve_token_mint(input: &str) -> String {
     match input.to_uppercase().as_str() {
         "SOL" => tokens::SOL.to_string(),
@@ -81,9 +81,9 @@ pub fn resolve_token_mint(input: &str) -> String {
     }
 }
 
-/// Известные decimals для часто используемых токенов — избегаем лишнего RPC-вызова.
-/// Значения для wBTC/wETH взяты по конвенции Wormhole-бриджа (капается на 8) —
-/// перед реальной торговлей этими токенами стоит свериться через solana::get_token_decimals.
+/// Known decimals for commonly used tokens — avoids unnecessary RPC calls.
+/// Values for wBTC/wETH follow Wormhole bridge convention (8 decimals) —
+/// before trading these tokens, it's recommended to verify via solana::get_token_decimals.
 pub fn known_decimals(mint: &str) -> Option<u8> {
     match mint {
         m if m == tokens::SOL => Some(9),
@@ -95,9 +95,9 @@ pub fn known_decimals(mint: &str) -> Option<u8> {
     }
 }
 
-/// Человекочитаемый символ по mint-адресу.
-/// Для wrapped-SOL (тот же минт, что используется в свопах как "нативный" SOL)
-/// показываем "wSOL", чтобы не путать со строкой нативного баланса SOL в отчёте.
+/// Human-readable symbol for a mint address.
+/// For wrapped SOL (same mint used as "native" SOL in swaps)
+/// displays "wSOL" to avoid confusion with native SOL balance in reports.
 pub fn symbol_for_mint(mint: &str) -> String {
     match mint {
         m if m == tokens::SOL => "wSOL".to_string(),
@@ -115,18 +115,18 @@ pub fn symbol_for_mint(mint: &str) -> String {
     }
 }
 
-/// Человекочитаемое объяснение кодов ошибок Jupiter для aggregator-роутеров
-/// (Metis/Dflow/OKX — то, что мы используем с excludeRouters=jupiterz)
+/// Human-readable explanation of Jupiter error codes for aggregator routers
+/// (Metis/Dflow/OKX — what we use with excludeRouters=jupiterz)
 fn describe_jupiter_error(code: i32, raw_message: &str) -> String {
     match code {
-        1 => "Недостаточно средств для этой операции".to_string(),
-        2 => "Недостаточно SOL для оплаты комиссии сети".to_string(),
-        3 => "Сумма слишком мала для этого режима свопа".to_string(),
-        _ => format!("Ошибка Jupiter ({}): {}", code, raw_message),
+        1 => "Insufficient funds for this operation".to_string(),
+        2 => "Insufficient SOL to pay network fees".to_string(),
+        3 => "Amount is too small for this swap mode".to_string(),
+        _ => format!("Jupiter error ({}): {}", code, raw_message),
     }
 }
 
-/// Получение ордера (котировка + неподписанная транзакция)
+/// Get order (quote + unsigned transaction)
 pub async fn get_order(
     api_key: &str,
     input_mint: &str,
@@ -161,7 +161,7 @@ pub async fn get_order(
         params.push(("excludeRouters", "jupiterz"));
     }
 
-    // Реферальная комиссия — оба параметра нужны одновременно, иначе не имеет смысла
+    // Referral fee — both parameters are needed together, otherwise it's pointless
     if let (Some(account), Some(ref fee)) = (referral_account, &referral_fee_str) {
         params.push(("referralAccount", account));
         params.push(("referralFee", fee.as_str()));
@@ -209,7 +209,7 @@ pub async fn get_order(
     Ok(order)
 }
 
-/// Подписывает Jupiter транзакцию через Openfort backend wallet
+/// Signs Jupiter transaction via Openfort backend wallet
 pub async fn sign_jupiter_order(
     openfort: &OpenfortClient,
     account_id: &str,
@@ -241,7 +241,7 @@ pub async fn sign_jupiter_order(
     Ok(BASE64.encode(&signed_bytes))
 }
 
-/// Выполнение подписанной транзакции
+/// Execute signed transaction
 pub async fn execute_swap(
     api_key: &str,
     signed_transaction: &str,
@@ -289,8 +289,8 @@ pub async fn execute_swap(
     Ok(result)
 }
 
-/// Общий пайплайн: ордер → подпись через Openfort → исполнение.
-/// Используется и для /buy, и для /sell — вся сложность в одном месте.
+/// Common pipeline: order → sign via Openfort → execute.
+/// Used for both /buy and /sell — all complexity in one place.
 pub async fn perform_swap(
     openfort: &OpenfortClient,
     jupiter_api_key: &str,
@@ -321,7 +321,7 @@ pub async fn perform_swap(
         let msg = order
             .error_message
             .clone()
-            .unwrap_or_else(|| "неизвестная ошибка".to_string());
+            .unwrap_or_else(|| "unknown error".to_string());
         anyhow!(describe_jupiter_error(code, &msg))
     })?;
 
@@ -330,11 +330,11 @@ pub async fn perform_swap(
 
     if result.status != "Success" {
         return Err(anyhow!(
-            "Своп не выполнен: {}",
+            "Swap failed: {}",
             result
                 .error
                 .clone()
-                .unwrap_or_else(|| "неизвестная ошибка".to_string())
+                .unwrap_or_else(|| "unknown error".to_string())
         ));
     }
 

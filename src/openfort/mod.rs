@@ -44,7 +44,7 @@ pub struct CreateAccountResponse {
 
 #[derive(Debug, Deserialize)]
 struct SignResponse {
-    pub signature: String, // hex-encoded подпись, без префикса 0x
+    pub signature: String, // hex-encoded signature, without 0x prefix
 }
 
 impl OpenfortClient {
@@ -70,7 +70,7 @@ impl OpenfortClient {
     }
 
     // ------------------------------------------------------------------
-    // X-Wallet-Auth JWT — используется только для /v2/accounts/backend/*
+    // X-Wallet-Auth JWT — used only for /v2/accounts/backend/*
     // ------------------------------------------------------------------
 
     fn generate_jwt(&self, method: &str, path: &str, body: &serde_json::Value) -> Result<String> {
@@ -107,8 +107,8 @@ impl OpenfortClient {
         Ok(hex::encode(hasher.finalize()))
     }
 
-    /// Канонизация JSON: ключи отсортированы, строки экранированы через serde_json
-    /// (совпадает с `sortKeys` + `JSON.stringify` в оригинальном walletAuth.ts).
+    /// Canonicalizes JSON: keys are sorted, strings are escaped via serde_json
+    /// (matches `sortKeys` + `JSON.stringify` in the original walletAuth.ts).
     fn canonical_json(&self, value: &serde_json::Value) -> String {
         match value {
             serde_json::Value::Object(map) => {
@@ -134,7 +134,7 @@ impl OpenfortClient {
     }
 
     // ------------------------------------------------------------------
-    // Аутентифицированные вызовы к /v2/accounts/backend/*
+    // Authenticated calls to /v2/accounts/backend/*
     // (secret_key + X-Wallet-Auth JWT)
     // ------------------------------------------------------------------
 
@@ -144,8 +144,8 @@ impl OpenfortClient {
         body: serde_json::Value,
     ) -> Result<T> {
         let jwt = self.generate_jwt("POST", path, &body)?;
-        // Отправляем именно ту строку, что была захеширована в JWT —
-        // TEE проверяет сырые байты тела, не пересериализует их сам.
+        // Send exactly the same string that was hashed in the JWT —
+        // the TEE checks the raw body bytes, not re-serializing it.
         let canonical_body = self.canonical_json(&body);
 
         let url = format!("{}{}", self.base_url, path);
@@ -169,16 +169,16 @@ impl OpenfortClient {
         }
     }
 
-    /// Создаёт новый backend-кошелёк на Solana (chainType: SVM)
+    /// Creates a new backend wallet on Solana (chainType: SVM)
     pub async fn create_wallet(&self, user_id: &str) -> Result<CreateAccountResponse> {
         println!("🔐 Creating backend wallet for user: {}", user_id);
         self.authenticated_post("/v2/accounts/backend", json!({ "chainType": "SVM" }))
             .await
     }
 
-    /// Подписывает сырые байты (например, message транзакции) через backend wallet.
-    /// Кодирует их в hex с префиксом 0x — именно так ожидает сервер.
-    /// Возвращает hex-подпись (без префикса).
+    /// Signs raw bytes (e.g., transaction message) via the backend wallet.
+    /// Encodes them in hex with the 0x prefix — the server expects this.
+    /// Returns a hex-encoded signature (without the 0x prefix).
     pub async fn sign_data(&self, account_id: &str, data_bytes: &[u8]) -> Result<String> {
         let path = format!("/v2/accounts/backend/{}/sign", account_id);
         let hex_data = format!("0x{}", hex::encode(data_bytes));
@@ -190,9 +190,9 @@ impl OpenfortClient {
     }
 
     // ------------------------------------------------------------------
-    // Kora JSON-RPC прокси (/rpc/solana/{cluster})
-    // Отдельная авторизация: publishable_key, БЕЗ X-Wallet-Auth —
-    // путь не подпадает под requiresWalletAuth (не содержит /accounts/backend)
+    // Kora JSON-RPC proxy (/rpc/solana/{cluster})
+    // Separate authentication: publishable_key, WITHOUT X-Wallet-Auth —
+    // the path does not fall under requiresWalletAuth (doesn't contain /accounts/backend)
     // ------------------------------------------------------------------
 
     pub async fn kora_request(
@@ -234,6 +234,6 @@ impl OpenfortClient {
         response_json
             .get("result")
             .cloned()
-            .ok_or_else(|| anyhow!("Отсутствует 'result' в ответе Kora: {}", response_json))
+            .ok_or_else(|| anyhow!("Missing 'result' in Kora response: {}", response_json))
     }
 }

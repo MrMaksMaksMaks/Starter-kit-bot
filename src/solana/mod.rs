@@ -1,12 +1,12 @@
-//! Модуль для работы с Solana RPC: баланс SOL, статус транзакций, SPL-токены
+//! Solana RPC module: SOL balance, transaction status, SPL tokens
 
 use anyhow::{anyhow, Result};
 use serde_json::json;
 use std::time::Duration;
 
-/// Легаси SPL Token Program
+/// Legacy SPL Token Program
 const TOKEN_PROGRAM_ID: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-/// Token-2022 — новый стандарт, часть токенов может лежать только здесь
+/// Token-2022 — new standard, some tokens may only exist here
 const TOKEN_2022_PROGRAM_ID: &str = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 
 #[derive(Debug, Clone)]
@@ -17,7 +17,7 @@ pub struct TokenBalance {
     pub ui_amount: f64,
 }
 
-/// Получение баланса SOL по адресу через HTTP
+/// Get SOL balance by address via HTTP
 pub async fn get_balance(rpc_url: &str, address: &str) -> Result<f64> {
     println!("🔍 Getting balance for address: {}", address);
 
@@ -68,7 +68,7 @@ pub async fn get_balance(rpc_url: &str, address: &str) -> Result<f64> {
     Ok(balance_sol)
 }
 
-/// Проверка статуса транзакции по хешу
+/// Check transaction status by hash
 pub async fn get_transaction_status(rpc_url: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
@@ -110,7 +110,7 @@ pub async fn get_transaction_status(rpc_url: &str, txid: &str) -> Result<String>
     Ok("not_found".to_string())
 }
 
-/// Получает decimals токена по mint-адресу через getTokenSupply.
+/// Gets token decimals by mint address via getTokenSupply
 pub async fn get_token_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
     println!("🔍 Getting decimals for mint: {}", mint);
 
@@ -145,7 +145,7 @@ pub async fn get_token_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
 
     if let Some(error) = response_json.get("error") {
         return Err(anyhow!(
-            "RPC error при получении decimals для {}: {}",
+            "RPC error while fetching decimals for {}: {}",
             mint,
             error
         ));
@@ -155,7 +155,7 @@ pub async fn get_token_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
         .as_u64()
         .ok_or_else(|| {
             anyhow!(
-                "Не удалось получить decimals для {} — возможно, это не SPL-токен",
+                "Failed to get decimals for {} — possibly not an SPL token",
                 mint
             )
         })?;
@@ -163,7 +163,7 @@ pub async fn get_token_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
     Ok(decimals as u8)
 }
 
-/// Запрашивает токен-аккаунты владельца под конкретный токен-стандарт (SPL или Token-2022)
+/// Fetches token accounts for a specific token program (SPL or Token-2022)
 async fn fetch_token_accounts_for_program(
     rpc_url: &str,
     owner_address: &str,
@@ -234,7 +234,7 @@ async fn fetch_token_accounts_for_program(
     Ok(balances)
 }
 
-/// Возвращает балансы всех SPL-токенов (включая Token-2022) с ненулевым балансом
+/// Returns all SPL token balances (including Token-2022) with non-zero balance
 pub async fn get_all_token_balances(
     rpc_url: &str,
     owner_address: &str,

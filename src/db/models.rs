@@ -1,8 +1,8 @@
-//! Модели данных для базы данных
+//! Database models
 
 use sqlx::FromRow;
 
-/// Модель пользователя
+/// User model
 #[derive(Debug, Clone, FromRow)]
 pub struct User {
     pub id: i64,
@@ -14,7 +14,7 @@ pub struct User {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
-/// Модель для создания пользователя
+/// Model for creating a new user
 #[derive(Debug, Clone)]
 pub struct NewUser {
     pub telegram_id: i64,

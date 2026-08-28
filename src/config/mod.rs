@@ -36,8 +36,8 @@ impl Config {
                 .context("OPENFORT_SECRET_KEY must be set")?,
             openfort_wallet_secret: env::var("OPENFORT_WALLET_SECRET")
                 .context("OPENFORT_WALLET_SECRET must be set")?,
-            // Обязателен, раз withdraw уже завязан на Kora через этот ключ —
-            // лучше упасть при старте, чем словить 401 на реальном выводе средств
+            // Required because withdraw already depends on Kora through this key —
+            // better to fail at startup than to get a 401 on an actual withdrawal
             openfort_publishable_key: env::var("OPENFORT_PUBLISHABLE_KEY")
                 .context("OPENFORT_PUBLISHABLE_KEY must be set (required for Kora/withdraw)")?,
             solana_rpc_url: env::var("SOLANA_RPC_URL")
@@ -51,7 +51,7 @@ impl Config {
             referral_fee_bps: env::var("REFERRAL_FEE_BPS")
                 .unwrap_or_else(|_| "50".to_string())
                 .parse()
-                .context("REFERRAL_FEE_BPS должен быть числом (bps, например 50)")?,
+                .context("REFERRAL_FEE_BPS must be a number (bps, e.g. 50)")?,
             referral_account: env::var("REFERRAL_ACCOUNT").ok().filter(|s| !s.is_empty()),
         })
     }

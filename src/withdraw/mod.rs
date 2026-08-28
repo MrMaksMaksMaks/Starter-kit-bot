@@ -1,4 +1,4 @@
-//! Модуль для вывода средств через Openfort backend wallet + Kora (gasless fee payer)
+//! Withdrawal module via Openfort backend wallet + Kora (gasless fee payer)
 
 use anyhow::{anyhow, Result};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
@@ -15,18 +15,18 @@ use std::str::FromStr;
 
 use crate::openfort::OpenfortClient;
 
-/// Выводит SOL на указанный адрес.
-/// Комиссию платит Kora (fee payer), а не сам пользователь — gasless-транзакция.
+/// Withdraws SOL to the specified address.
+/// Kora pays the fee (fee payer), not the user — gasless transaction.
 ///
-/// Пайплайн:
-/// 1. Получаем адрес fee payer'а от Kora
-/// 2. Получаем свежий blockhash от Kora
-/// 3. Строим транзакцию перевода, где fee payer — адрес Kora
-/// 4. Подписываем message-байты через Openfort backend wallet (подпись пользователя)
-/// 5. Вставляем подпись пользователя в правильный слот (найденный по адресу, не хардкод 0 —
-///    слот 0 принадлежит Kora как fee payer)
-/// 6. Отправляем частично подписанную транзакцию в Kora — она досоединяет свою подпись
-///    как fee payer и broadcast'ит в сеть
+/// Pipeline:
+/// 1. Get the fee payer address from Kora
+/// 2. Get a fresh blockhash from Kora
+/// 3. Build a transfer transaction where the fee payer is Kora's address
+/// 4. Sign the message bytes via Openfort backend wallet (user signature)
+/// 5. Insert the user's signature into the correct slot (found by address, not hardcoded 0 —
+///    slot 0 belongs to Kora as the fee payer)
+/// 6. Send the partially signed transaction to Kora — it attaches its own signature
+///    as the fee payer and broadcasts it to the network
 pub async fn withdraw_sol(
     openfort: &OpenfortClient,
     account_id: &str,
@@ -37,7 +37,7 @@ pub async fn withdraw_sol(
 ) -> Result<String> {
     println!("💸 Withdrawing {} lamports to {}", amount_lamports, to_address);
 
-    // 1. Fee payer от Kora
+    // 1. Fee payer from Kora
     println!("⏳ Getting Kora fee payer...");
     let payer_result = openfort
         .kora_request(cluster, "getPayerSigner", json!({}))
@@ -49,7 +49,7 @@ pub async fn withdraw_sol(
         .to_string();
     println!("✅ Kora fee payer: {}", signer_address);
 
-    // 2. Blockhash от Kora
+    // 2. Blockhash from Kora
     println!("⏳ Getting blockhash from Kora...");
     let blockhash_result = openfort
         .kora_request(cluster, "getBlockhash", json!({}))
@@ -62,45 +62,45 @@ pub async fn withdraw_sol(
         .map_err(|_| anyhow!("Invalid blockhash: {}", blockhash_str))?;
     println!("✅ Blockhash: {}", blockhash);
 
-    // 3. Строим транзакцию — fee payer это Kora, не пользователь
+    // 3. Build transaction — fee payer is Kora, not the user
     let from_pubkey = Pubkey::from_str(from_address)
-        .map_err(|_| anyhow!("Некорректный адрес отправителя: {}", from_address))?;
+        .map_err(|_| anyhow!("Invalid sender address: {}", from_address))?;
     let to_pubkey = Pubkey::from_str(to_address)
-        .map_err(|_| anyhow!("Некорректный адрес получателя: {}", to_address))?;
+        .map_err(|_| anyhow!("Invalid recipient address: {}", to_address))?;
     let payer_pubkey = Pubkey::from_str(&signer_address)
-        .map_err(|_| anyhow!("Некорректный адрес Kora fee payer: {}", signer_address))?;
+        .map_err(|_| anyhow!("Invalid Kora fee payer address: {}", signer_address))?;
 
     let instruction = system_instruction::transfer(&from_pubkey, &to_pubkey, amount_lamports);
     let message = Message::new_with_blockhash(&[instruction], Some(&payer_pubkey), &blockhash);
     let mut tx = Transaction::new_unsigned(message);
-    // tx.signatures уже инициализированы нулевыми подписями по числу required signers
+    // tx.signatures are already initialized with zero signatures equal to the number of required signers
 
-    // 4. Подписываем именно message-байты, не всю транзакцию целиком
+    // 4. Sign the message bytes, not the whole transaction
     let message_bytes = tx.message.serialize();
     println!("⏳ Signing with Openfort Backend Wallet...");
     let signature_hex = openfort.sign_data(account_id, &message_bytes).await?;
 
     let sig_bytes = hex::decode(signature_hex.trim_start_matches("0x"))
-        .map_err(|e| anyhow!("Не удалось декодировать подпись из hex: {}", e))?;
+        .map_err(|e| anyhow!("Failed to decode signature from hex: {}", e))?;
     let signature = Signature::try_from(sig_bytes.as_slice())
-        .map_err(|_| anyhow!("Некорректная длина подписи: {} байт", sig_bytes.len()))?;
+        .map_err(|_| anyhow!("Invalid signature length: {} bytes", sig_bytes.len()))?;
 
-    // 5. Ищем реальный индекс пользователя среди сайнеров — слот 0 принадлежит Kora
+    // 5. Find the user's actual index among signers — slot 0 belongs to Kora
     let signer_index = tx
         .message
         .account_keys
         .iter()
         .position(|k| *k == from_pubkey)
-        .ok_or_else(|| anyhow!("Аккаунт пользователя не найден среди сайнеров транзакции"))?;
+        .ok_or_else(|| anyhow!("User account not found among transaction signers"))?;
 
     tx.signatures[signer_index] = signature;
-    println!("✅ Подпись пользователя вставлена в слот {}", signer_index);
+    println!("✅ User signature inserted into slot {}", signer_index);
 
-    // 6. Сериализуем частично подписанную транзакцию (слот Kora пока пустой)
+    // 6. Serialize the partially signed transaction (Kora's slot is still empty)
     let partial_tx_bytes = bincode::serialize(&tx)?;
     let partial_tx_base64 = BASE64.encode(&partial_tx_bytes);
 
-    // 7. Kora досоединяет свою подпись как fee payer и отправляет в сеть
+    // 7. Kora attaches its signature as the fee payer and sends it to the network
     println!("⏳ Kora signing and sending transaction...");
     let send_result = openfort
         .kora_request(
@@ -118,6 +118,6 @@ pub async fn withdraw_sol(
         .ok_or_else(|| anyhow!("Missing signature in Kora response: {}", send_result))?
         .to_string();
 
-    println!("✅ Транзакция подтверждена! TXID: {}", signature_str);
+    println!("✅ Transaction confirmed! TXID: {}", signature_str);
     Ok(signature_str)
 }

@@ -11,7 +11,7 @@ use teloxide::prelude::*;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
-/// Экранирует спецсимволы MarkdownV2 в динамических данных перед вставкой в сообщение.
+/// Escapes special MarkdownV2 characters in dynamic data before inserting into a message.
 fn escape_markdown_v2(text: &str) -> String {
     const SPECIAL: &[char] = &[
         '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=',
@@ -27,8 +27,8 @@ fn escape_markdown_v2(text: &str) -> String {
     escaped
 }
 
-/// Форматирует сырую сумму (в минимальных единицах, как строка) в читаемый вид
-/// с учётом decimals — например, "1500000" при decimals=6 станет "1.5"
+/// Formats a raw amount (in smallest units, as a string) into a human-readable format
+/// with decimals — for example, "1500000" with decimals=6 becomes "1.5"
 fn format_token_amount(raw_amount: &str, decimals: u8) -> String {
     match raw_amount.parse::<u64>() {
         Ok(raw) => {
@@ -51,8 +51,8 @@ fn format_token_amount(raw_amount: &str, decimals: u8) -> String {
     }
 }
 
-/// Определяет decimals токена: сначала проверяет известные (SOL/USDC/USDT/wBTC/wETH),
-/// иначе — идёт в RPC за getTokenSupply
+/// Resolves token decimals: first checks known ones (SOL/USDC/USDT/wBTC/wETH),
+/// otherwise queries RPC via getTokenSupply
 async fn resolve_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
     if let Some(d) = jupiter::known_decimals(mint) {
         return Ok(d);
@@ -115,12 +115,12 @@ async fn main() -> Result<()> {
                     Commands:\n\
                     /create_wallet - Create a wallet\n\
                     /balance - Check SOL balance\n\
-                    /tokens - Показать балансы всех SPL-токенов\n\
-                    /buy <token> <SOL> - Потратить SOL на покупку токена\n\
-                    /sell <token> <кол-во> - Продать токен за SOL\n\
+                    /tokens - Show all SPL token balances\n\
+                    /buy <token> <SOL> - Spend SOL to buy a token\n\
+                    /sell <token> <amount> - Sell a token for SOL\n\
                     /withdraw <amount> <address> - Withdraw SOL\n\n\
-                    Пример: /buy USDC 0.1 — потратит 0.1 SOL на покупку USDC\n\
-                    Пример: /sell USDC 5 — продаст 5 USDC за SOL"
+                    Example: /buy USDC 0.1 — spends 0.1 SOL to buy USDC\n\
+                    Example: /sell USDC 5 — sells 5 USDC for SOL"
                 ).await?;
                 return Ok(());
             }
@@ -227,14 +227,14 @@ async fn main() -> Result<()> {
             }
 
             // ============================
-            // /tokens — SOL + все SPL-токены
+            // /tokens — SOL + all SPL tokens
             // ============================
             if text == "/tokens" {
                 match repo.find_by_telegram_id(telegram_id).await {
                     Ok(Some(user)) => {
                         println!("💎 Getting all token balances for: {}", user.solana_address);
 
-                        bot.send_message(chat_id, "🔄 Получаю балансы...").await?;
+                        bot.send_message(chat_id, "🔄 Fetching balances...").await?;
 
                         match balance::get_formatted_balances(&config.solana_rpc_url, &user.solana_address).await {
                             Ok(formatted) => {
@@ -244,22 +244,22 @@ async fn main() -> Result<()> {
                             }
                             Err(e) => {
                                 println!("❌ Failed to get balances: {}", e);
-                                bot.send_message(chat_id, format!("❌ Ошибка: {}", e)).await?;
+                                bot.send_message(chat_id, format!("❌ Error: {}", e)).await?;
                             }
                         }
                     }
                     Ok(None) => {
-                        bot.send_message(chat_id, "⚠️ Сначала создайте кошелёк: /create_wallet").await?;
+                        bot.send_message(chat_id, "⚠️ Please create a wallet first: /create_wallet").await?;
                     }
                     Err(e) => {
-                        bot.send_message(chat_id, format!("❌ Ошибка БД: {}", e)).await?;
+                        bot.send_message(chat_id, format!("❌ DB error: {}", e)).await?;
                     }
                 }
                 return Ok(());
             }
 
             // ============================
-            // /buy — тратим SOL, покупаем токен
+            // /buy — spend SOL to buy a token
             // ============================
             if text.starts_with("/buy") {
                 println!("🟢 Processing buy for user: {}", telegram_id);
@@ -268,7 +268,7 @@ async fn main() -> Result<()> {
                 if parts.len() < 3 {
                     bot.send_message(
                         chat_id,
-                        "❌ Укажите токен и сумму в SOL для траты.\n\nПример: /buy USDC 0.1\n(потратит 0.1 SOL на покупку USDC)"
+                        "❌ Please specify token and amount in SOL to spend.\n\nExample: /buy USDC 0.1\n(spends 0.1 SOL to buy USDC)"
                     ).await?;
                     return Ok(());
                 }
@@ -277,7 +277,7 @@ async fn main() -> Result<()> {
                 let sol_amount: f64 = match parts[2].parse() {
                     Ok(a) if a > 0.0 => a,
                     _ => {
-                        bot.send_message(chat_id, "❌ Некорректная сумма. Укажите положительное число.").await?;
+                        bot.send_message(chat_id, "❌ Invalid amount. Please enter a positive number.").await?;
                         return Ok(());
                     }
                 };
@@ -290,7 +290,7 @@ async fn main() -> Result<()> {
                         bot.send_message(
                             chat_id,
                             format!(
-                                "🔄 Тратим {} SOL, ищем лучший маршрут для покупки {}\\.\\.\\.",
+                                "🔄 Spending {} SOL, searching for the best route to buy {}\\.\\.\\.",
                                 escape_markdown_v2(&sol_amount.to_string()),
                                 escape_markdown_v2(token_input)
                             )
@@ -317,7 +317,7 @@ async fn main() -> Result<()> {
                                 bot.send_message(
                                     chat_id,
                                     format!(
-                                        "✅ Куплено\\!\n\nПотрачено: {} SOL\nПолучено: {} {}\nTXID: `{}`",
+                                        "✅ Purchased\\!\n\nSpent: {} SOL\nReceived: {} {}\nTXID: `{}`",
                                         escape_markdown_v2(&sol_amount.to_string()),
                                         escape_markdown_v2(&received),
                                         escape_markdown_v2(token_input),
@@ -327,22 +327,22 @@ async fn main() -> Result<()> {
                             }
                             Err(e) => {
                                 println!("❌ Buy failed: {}", e);
-                                bot.send_message(chat_id, format!("❌ Покупка не удалась: {}", e)).await?;
+                                bot.send_message(chat_id, format!("❌ Purchase failed: {}", e)).await?;
                             }
                         }
                     }
                     Ok(None) => {
-                        bot.send_message(chat_id, "⚠️ Сначала создайте кошелёк: /create_wallet").await?;
+                        bot.send_message(chat_id, "⚠️ Please create a wallet first: /create_wallet").await?;
                     }
                     Err(e) => {
-                        bot.send_message(chat_id, format!("❌ Ошибка БД: {}", e)).await?;
+                        bot.send_message(chat_id, format!("❌ DB error: {}", e)).await?;
                     }
                 }
                 return Ok(());
             }
 
             // ============================
-            // /sell — продаём токен, получаем SOL
+            // /sell — sell a token for SOL
             // ============================
             if text.starts_with("/sell") {
                 println!("🔴 Processing sell for user: {}", telegram_id);
@@ -351,7 +351,7 @@ async fn main() -> Result<()> {
                 if parts.len() < 3 {
                     bot.send_message(
                         chat_id,
-                        "❌ Укажите токен и количество для продажи.\n\nПример: /sell USDC 5\n(продаст 5 USDC за SOL)"
+                        "❌ Please specify token and amount to sell.\n\nExample: /sell USDC 5\n(sells 5 USDC for SOL)"
                     ).await?;
                     return Ok(());
                 }
@@ -360,7 +360,7 @@ async fn main() -> Result<()> {
                 let token_amount: f64 = match parts[2].parse() {
                     Ok(a) if a > 0.0 => a,
                     _ => {
-                        bot.send_message(chat_id, "❌ Некорректная сумма. Укажите положительное число.").await?;
+                        bot.send_message(chat_id, "❌ Invalid amount. Please enter a positive number.").await?;
                         return Ok(());
                     }
                 };
@@ -372,7 +372,7 @@ async fn main() -> Result<()> {
                         let decimals = match resolve_decimals(&config.solana_rpc_url, &input_mint).await {
                             Ok(d) => d,
                             Err(e) => {
-                                bot.send_message(chat_id, format!("❌ Не удалось определить токен: {}", e)).await?;
+                                bot.send_message(chat_id, format!("❌ Failed to resolve token: {}", e)).await?;
                                 return Ok(());
                             }
                         };
@@ -382,7 +382,7 @@ async fn main() -> Result<()> {
                         bot.send_message(
                             chat_id,
                             format!(
-                                "🔄 Продаём {} {}, ищем лучший маршрут\\.\\.\\.",
+                                "🔄 Selling {} {}, searching for the best route\\.\\.\\.",
                                 escape_markdown_v2(&token_amount.to_string()),
                                 escape_markdown_v2(token_input)
                             )
@@ -406,7 +406,7 @@ async fn main() -> Result<()> {
                                 bot.send_message(
                                     chat_id,
                                     format!(
-                                        "✅ Продано\\!\n\nПродано: {} {}\nПолучено: {} SOL\nTXID: `{}`",
+                                        "✅ Sold\\!\n\nSold: {} {}\nReceived: {} SOL\nTXID: `{}`",
                                         escape_markdown_v2(&token_amount.to_string()),
                                         escape_markdown_v2(token_input),
                                         escape_markdown_v2(&received_sol),
@@ -416,15 +416,15 @@ async fn main() -> Result<()> {
                             }
                             Err(e) => {
                                 println!("❌ Sell failed: {}", e);
-                                bot.send_message(chat_id, format!("❌ Продажа не удалась: {}", e)).await?;
+                                bot.send_message(chat_id, format!("❌ Sale failed: {}", e)).await?;
                             }
                         }
                     }
                     Ok(None) => {
-                        bot.send_message(chat_id, "⚠️ Сначала создайте кошелёк: /create_wallet").await?;
+                        bot.send_message(chat_id, "⚠️ Please create a wallet first: /create_wallet").await?;
                     }
                     Err(e) => {
-                        bot.send_message(chat_id, format!("❌ Ошибка БД: {}", e)).await?;
+                        bot.send_message(chat_id, format!("❌ DB error: {}", e)).await?;
                     }
                 }
                 return Ok(());

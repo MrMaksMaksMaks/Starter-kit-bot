@@ -1,11 +1,11 @@
-//! Репозиторий для работы с пользователями
+//! User repository
 
 use anyhow::Result;
 use sqlx::SqlitePool;
 
 use super::models::{NewUser, User};
 
-/// Репозиторий пользователей
+/// User repository
 #[derive(Debug, Clone)]
 pub struct UserRepository {
     pool: SqlitePool,
@@ -16,7 +16,7 @@ impl UserRepository {
         Self { pool }
     }
 
-    /// Создание нового пользователя
+    /// Create a new user
     pub async fn create(&self, new_user: NewUser) -> Result<User> {
         let user = sqlx::query_as::<_, User>(
             r#"
@@ -35,7 +35,7 @@ impl UserRepository {
         Ok(user)
     }
 
-    /// Поиск пользователя по Telegram ID
+    /// Find a user by Telegram ID
     pub async fn find_by_telegram_id(&self, telegram_id: i64) -> Result<Option<User>> {
         let user = sqlx::query_as::<_, User>(
             r#"
@@ -51,7 +51,7 @@ impl UserRepository {
         Ok(user)
     }
 
-    /// Проверка существования пользователя
+    /// Check if a user exists
     pub async fn exists(&self, telegram_id: i64) -> Result<bool> {
         let count: (i64,) = sqlx::query_as(
             r#"

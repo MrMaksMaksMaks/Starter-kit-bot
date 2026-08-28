@@ -1,4 +1,4 @@
-//! Модуль для работы с базой данных SQLite
+//! SQLite database module
 
 pub mod models;
 pub mod repository;
@@ -6,17 +6,17 @@ pub mod repository;
 use anyhow::Result;
 use sqlx::sqlite::SqlitePool;
 
-/// Инициализация пула соединений с БД
+/// Initialize database connection pool
 pub async fn init_pool(database_url: &str) -> Result<SqlitePool> {
     let pool = SqlitePool::connect(database_url).await?;
     
-    // Создаем таблицы
+    // Create tables
     create_tables(&pool).await?;
     
     Ok(pool)
 }
 
-/// Создание таблиц
+/// Create database tables
 async fn create_tables(pool: &SqlitePool) -> Result<()> {
     sqlx::query(
         r#"
@@ -34,7 +34,7 @@ async fn create_tables(pool: &SqlitePool) -> Result<()> {
     .execute(pool)
     .await?;
 
-    // Создаем индексы для быстрого поиска
+    // Create indexes for fast lookups
     sqlx::query(
         r#"
         CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)
