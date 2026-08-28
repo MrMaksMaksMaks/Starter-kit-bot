@@ -628,9 +628,9 @@ git push origin feature/my-feature
 
 ## Author
 
-Built by [your name / GitHub handle here] as part of a submission for the Solana Foundation Georgia Grant.
+Built by MAKSIM GORBUNOV
 
-Questions, feedback, or collaboration: [add your contact — GitHub issues, Telegram, or email]
+Questions, feedback, or collaboration: mrmaksmaksmaks@gmail.com
 
 ---
 
@@ -1055,9 +1055,9 @@ git push origin feature/my-feature
 
 ## Автор
 
-Разработано [твоё имя / GitHub] в рамках заявки на Solana Foundation Georgia Grant.
+Разработчик МАКСИМ ГОРБУНОВ/
 
-Вопросы, отзывы, сотрудничество: [добавь контакт — GitHub issues, Telegram или email]
+Вопросы, отзывы, сотрудничество: mrmaksmaksmaks@gmail.com
 
 ---
 
