@@ -30,7 +30,7 @@ Solana fits this use case specifically because interactions are cheap and fast e
 | Kora sponsored (gasless) withdrawals | ✅ |
 | Jupiter Referral (optional) | ✅ Mainnet |
 
-> Transaction fees for supported flows (like withdrawals) are sponsored by Kora, so the user does not need to hold SOL to pay the network fee.
+> For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
 
 ---
 
@@ -184,7 +184,7 @@ Telegram User
 /withdraw
       │
       ▼
-Validate destination + amount
+Validate destination format + amount
       │
       ▼
 Openfort Backend Wallet (user signs)
@@ -292,48 +292,43 @@ Developers using this repository as a foundation can remove or replace this conf
 ## Security
 
 Security is a core design consideration of the project, and an area of active, ongoing work.
+The starter kit is designed to demonstrate a safer architecture for Telegram-native Solana applications, while being explicit about the security boundaries of the current implementation.
 
-### Current model
+### Current security model
 
-The Telegram bot does not store users' private keys in SQLite or in the application source code. Signing is delegated to Openfort Backend Wallet infrastructure; sensitive credentials are provided through environment variables and must never be committed.
+The Telegram bot does not store users' private keys in SQLite or in the application source code. Transaction signing is delegated to Openfort Backend Wallet infrastructure. The application stores the mapping between the Telegram user and the corresponding Openfort account / Solana wallet.
 
-Given this architecture, the realistic attack surfaces to design around include:
+Sensitive application credentials are provided through environment variables and must never be committed to the repository.
 
-- Telegram account takeover;
-- unauthorized withdrawal requests;
-- forged or replayed signing requests;
-- malicious destination addresses;
-- compromised application credentials (`OPENFORT_SECRET_KEY`, `OPENFORT_WALLET_SECRET`);
-- RPC / API abuse;
-- transaction manipulation between construction and signing.
+### Current limitations
 
-### Known limitations
+This repository is a working starter kit, not a fully hardened production system.
 
-This repository is a starter kit, not a hardened production system. Specifically, today:
+Known limitations in the current implementation include:
 
-- **withdrawals execute immediately, with no confirmation step;**
-- there is no rate limiting on Telegram commands;
-- there is no replay protection beyond what Solana's own blockhash expiry provides;
-- there is no transaction simulation before signing.
+- withdrawals execute immediately without a confirmation step;
+- withdrawal limits are not currently enforced;
+- there is no dedicated transaction history;
+- Telegram command rate limiting is not currently implemented;
+- replay protection beyond Solana's transaction/blockhash mechanics is not implemented;
+- transactions are not simulated before signing.
 
-These are deliberate MVP simplifications, not oversights — treat them as required work, not optional polish, before exposing this to real users with real funds.
+These limitations are intentionally documented so developers can clearly understand what the reference implementation does today and what still needs to be hardened before exposing it to real users with meaningful funds.
 
-### Production hardening
+### Planned security hardening
 
-Planned work:
+The roadmap focuses on a defined set of security improvements:
 
-- withdrawal confirmation and configurable limits;
+- withdrawal confirmation and configurable withdrawal limits;
 - address validation;
-- rate limiting;
-- replay protection;
+- rate limiting reference implementation;
+- replay / duplicate-action protection;
 - transaction simulation before signing;
-- improved authentication and authorization;
-- protection against common application-layer attacks;
-- monitoring, alerting, and audit logging;
-- database backups and secret rotation;
-- independent security audit.
+- structured transaction and security logging;
+- independently verified account recovery with anti-takeover safeguards;
+- independent security review and remediation of critical or high-risk findings.
 
-**Account recovery** — a planned feature is account recovery after a Telegram ID change. This is a sensitive operation: the design must independently verify ownership of the original account before granting access to a new Telegram identity, plus include anti-takeover protections. The specific verification mechanism is intentionally not finalized here — it will be detailed in a dedicated design document before implementation, rather than committed to prematurely in this README.
+The goal is not to claim that the starter kit becomes universally "production secure". Instead, the project will provide a significantly stronger and better-documented security baseline that developers can evaluate and extend for their own applications.
 
 ---
 
@@ -351,34 +346,44 @@ Real integration pitfalls discovered while building this project. Documenting th
 
 ## Roadmap
 
-Scope is intentionally focused: this open-source repository is meant to be a secure, reusable **foundation** — not a full-featured trading bot. Advanced trading features are being developed separately as a commercial product built on top of this same open-source base; they are not part of this repository's roadmap, and are called out explicitly below rather than left ambiguous.
+Scope is intentionally focused.
+
+This open-source repository is intended to become a more secure, reusable foundation for Telegram-native Solana applications — not a full-featured trading platform.
+
+The roadmap focuses on hardening the existing working implementation, improving developer experience, documenting production considerations, and independently reviewing the security-critical parts of the system.
 
 ### Core
 
 - [ ] Withdrawal confirmation step
-- [ ] Withdrawal limits
+- [ ] Configurable withdrawal limits
 - [ ] Transaction history
-- [ ] Account recovery after Telegram ID change (independently verified ownership + anti-takeover protections)
-- [ ] More SPL tokens, with independently verified decimals
-- [ ] Token metadata & logos
+- [ ] Account recovery after Telegram ID change with independently verified ownership and anti-takeover protections
+- [ ] Support for additional SPL tokens with independently verified decimals
+- [ ] Token metadata and logos
 
-### DX (developer experience)
+### Security & Reliability
 
-- [ ] Integration tests
-- [ ] Inline keyboard UI
-- [ ] Georgian translation of documentation
+- [ ] Rate limiting reference implementation
+- [ ] Replay / duplicate-action protection
+- [ ] Address validation
+- [ ] Transaction simulation before signing
+- [ ] Structured transaction and security logging
+- [ ] Independent security review
+- [ ] Remediation of critical and high-risk findings identified during the review
+
+### Developer Experience
+
+- [ ] Core integration tests
+- [ ] Inline keyboard UI for confirmation and common actions
+- [ ] Production deployment guide
 
 ### Trading
 
-Advanced trading features — limit orders, DCA, token sniping, copy trading — are intentionally **out of scope** for this open-source starter kit. They carry meaningfully higher security, execution-reliability, and abuse-prevention requirements than the core wallet / swap / withdraw flows this repository demonstrates. They are being explored separately, as part of a commercial product built on top of this same open-source foundation.
+Advanced trading features — including limit orders, DCA, token sniping, and copy trading — are intentionally out of scope for this open-source starter kit.
 
-### Production
+These features require substantially more complex execution, security, reliability, and abuse-prevention mechanisms than the core wallet, swap, and withdrawal infrastructure demonstrated here.
 
-- [ ] Rate limiting reference implementation
-- [ ] Replay protection
-- [ ] Transaction simulation before send
-- [ ] Security audit
-- [ ] Production deployment guide
+They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the funded roadmap for this repository.
 
 ---
 
@@ -472,11 +477,11 @@ Solana хорошо подходит именно для такого сцена
 
 | Функция | Скриншот |
 |---------|----------|
-| **Главное меню** | ![Главное меню](./images/Screenshot_Start.jpg) |
-| **Создание кошелька** | ![Кошелек](./images/Screenshot_Create_wallet.jpg) |
-| **Покупка токена** | ![Покупка](./images/Screenshot_Buy_USDC.jpg) |
-| **Баланс кошелька SOL** | ![Баланс SOL](./images/Screenshot_Balance.jpg) |
-| **Баланс кошелька Tokens** | ![Баланс Tokens](./images/Screenshot_Tokens.jpg) |
+| **Главное меню** | <img src="./images/Screenshot_Start.jpg" width="300"/> |
+| **Создание кошелька** | <img src="./images/Screenshot_Create_wallet.jpg" width="300"/> |
+| **Покупка токена** | <img src="./images/Screenshot_Buy_USDC.jpg" width="300"/> |
+| **Баланс SOL** | <img src="./images/Screenshot_Balance.jpg" width="300"/> |
+| **Портфель токенов** | <img src="./images/Screenshot_Tokens.jpg" width="300"/> |
 
 ---
 
@@ -619,54 +624,49 @@ cargo run
 ## Безопасность
 
 Безопасность — ключевая часть проекта и область постоянной, активной работы.
+Стартер-кит спроектирован для демонстрации безопасной архитектуры для Telegram-приложений на Solana, при этом чётко обозначены границы безопасности текущей реализации.
 
-### Текущая модель
+### Текущая модель безопасности
 
-Telegram-бот не хранит приватные ключи пользователей ни в SQLite, ни в исходном коде. Подпись делегируется инфраструктуре Openfort Backend Wallet; чувствительные данные передаются через переменные окружения и никогда не должны попадать в git.
+Telegram-бот не хранит приватные ключи пользователей ни в SQLite, ни в исходном коде приложения. Подпись транзакций делегируется инфраструктуре Openfort Backend Wallet. Приложение хранит только связку между Telegram-пользователем и соответствующим Openfort-аккаунтом / Solana-кошельком.
 
-С учётом такой архитектуры, реалистичные поверхности атаки, под которые стоит проектировать защиту:
+Чувствительные учётные данные приложения передаются через переменные окружения и никогда не должны попадать в репозиторий.
 
-- захват Telegram-аккаунта;
-- неавторизованные запросы на вывод средств;
-- подделанные или replay-запросы на подпись;
-- вредоносные адреса получателя;
-- компрометация credentials приложения (`OPENFORT_SECRET_KEY`, `OPENFORT_WALLET_SECRET`);
-- злоупотребление RPC/API;
-- манипуляция транзакцией между сборкой и подписью.
+### Текущие ограничения
 
-### Известные ограничения
+Этот репозиторий — рабочий стартер-кит, а не полностью защищённая production-система.
 
-Этот репозиторий — стартер-кит, а не защищённая production-система. Конкретно сейчас:
+Известные ограничения в текущей реализации включают:
 
-- **вывод средств выполняется мгновенно, без подтверждения;**
-- нет rate limiting на команды Telegram;
-- нет защиты от replay сверх того, что даёт естественное истечение blockhash в Solana;
-- нет симуляции транзакции перед подписью.
+- вывод средств выполняется мгновенно, без шага подтверждения;
+- лимиты на вывод в настоящее время не применяются;
+- отсутствует выделенная история транзакций;
+- ограничение частоты команд Telegram в настоящее время не реализовано;
+- защита от повторных атак (replay) сверх механизмов транзакций/blockhash Solana не реализована;
+- транзакции не симулируются перед подписью.
 
-Это осознанные упрощения MVP, а не недосмотр — стоит воспринимать их как обязательную работу, а не опциональную полировку, прежде чем показывать бота реальным пользователям с реальными деньгами.
+Эти ограничения намеренно задокументированы, чтобы разработчики могли чётко понимать, что делает эталонная реализация сегодня и что ещё необходимо усилить перед тем, как показывать её реальным пользователям с реальными деньгами.
 
-### Усиление для production
+### Планируемое усиление безопасности
 
-Планируемая работа:
+Дорожная карта фокусируется на определённом наборе улучшений безопасности:
 
-- подтверждение вывода средств и настраиваемые лимиты;
+- подтверждение вывода средств и настраиваемые лимиты вывода;
 - валидация адресов;
-- rate limiting;
-- защита от replay-атак;
+- реализация ограничения частоты запросов;
+- защита от повторных / дублирующих действий;
 - симуляция транзакции перед подписью;
-- усиленная аутентификация и авторизация;
-- защита от распространённых атак на уровне приложения;
-- мониторинг, алертинг и аудит операций;
-- резервное копирование БД и ротация секретов;
-- независимый security audit.
+- структурированное логирование транзакций и безопасности;
+- независимо проверяемое восстановление аккаунта с защитой от захвата;
+- независимый аудит безопасности и устранение критических или высокорисковых находок.
 
-**Восстановление аккаунта** — планируемая функция: восстановление доступа после смены Telegram ID. Это чувствительная операция: механизм должен независимо подтверждать владение исходным аккаунтом перед выдачей доступа новой Telegram-идентичности, плюс включать защиту от захвата (anti-takeover). Конкретный механизм верификации намеренно не зафиксирован здесь — он будет описан в отдельном design-документе перед реализацией, а не преждевременно закреплён в этом README.
+Цель — не утверждать, что стартер-кит становится универсально «безопасным для production». Вместо этого проект предоставит значительно более сильную и лучше документированную базовую линию безопасности, которую разработчики смогут оценивать и расширять для своих собственных приложений.
 
 ---
 
-## Технические уроки интеграции
+## Технические сложности интеграции
 
-Реальные ловушки, обнаруженные при разработке этого проекта. Фиксация их здесь должна сэкономить следующему разработчику время на отладку, которое ушло на их обнаружение.
+Реальные сложности, обнаруженные при разработке этого проекта. Их описание должно сэкономить следующему разработчику значительное время на отладку.
 
 - **Jupiter API работает только на мейннете.** На devnet нет реальной ликвидности Jupiter. Создание кошелька, проверка баланса и вывод средств работают на devnet нормально, а `/buy` и `/sell` маршрут не найдут — свопы нужно тестировать на мейннете с небольшими суммами.
 - **Поддерживается только режим `ExactIn`.** Эндпоинт `/swap/v2/order` не поддерживает `ExactOut`. Можно указать «потрать ровно столько», но не «получи ровно столько».
@@ -678,40 +678,50 @@ Telegram-бот не хранит приватные ключи пользова
 
 ## Roadmap
 
-Скоуп намеренно ограничен: этот открытый репозиторий задуман как защищённая, переиспользуемая **основа**, а не полнофункциональный трейдинг-бот. Продвинутые торговые функции разрабатываются отдельно как коммерческий продукт поверх этой же открытой основы — они не входят в roadmap этого репозитория, и это явно указано ниже, а не оставлено недосказанным.
+Скоуп намеренно ограничен.
+
+Этот открытый репозиторий задуман как более безопасная основа и ядро для Telegram-приложений на Solana — а не как полнофункциональная торговая платформа.
+
+Дорожная карта фокусируется на усилении существующей рабочей реализации, улучшении опыта разработчика, документировании производственных аспектов и независимом аудите критически важных для безопасности частей системы.
 
 ### Core
 
-- [ ] Подтверждение перед выводом средств
-- [ ] Лимиты на вывод
+- [ ] Шаг подтверждения перед выводом средств
+- [ ] Настраиваемые лимиты вывода
 - [ ] История транзакций
-- [ ] Восстановление аккаунта после смены Telegram ID (независимо проверенное владение + anti-takeover защита)
-- [ ] Больше SPL-токенов с независимо проверенными decimals
+- [ ] Восстановление аккаунта после смены Telegram ID с независимо проверяемым владением и защитой от захвата
+- [ ] Поддержка дополнительных SPL-токенов с независимо проверенными decimals
 - [ ] Метаданные токенов и логотипы
 
-### DX (опыт разработчика)
+### Безопасность и Надёжность
 
-- [ ] Integration tests
-- [ ] Inline keyboard UI
-- [ ] Перевод документации на грузинский
+- [ ] Эталонная реализация ограничения частоты запросов (rate limiting)
+- [ ] Защита от повторных / дублирующих действий
+- [ ] Валидация адресов
+- [ ] Симуляция транзакции перед подписью
+- [ ] Структурированное логирование транзакций и безопасности
+- [ ] Независимый аудит безопасности
+- [ ] Устранение критических и высокорисковых находок, выявленных в ходе аудита
 
-### Trading
+### Инструменты разработчика
 
-Продвинутые торговые функции — limit orders, DCA, token sniping, copy trading — намеренно **вне скоупа** этого открытого стартер-кита. Они требуют заметно более высоких требований к безопасности, надёжности исполнения и защите от злоупотреблений, чем базовые потоки wallet/swap/withdraw, которые демонстрирует этот репозиторий. Они прорабатываются отдельно, как часть коммерческого продукта поверх этой же открытой основы.
+- [ ] Интеграционные тесты
+- [ ] Inline-клавиатура для подтверждения и типовых действий
+- [ ] Руководство по развёртыванию в production
 
-### Production
+### Торговля
 
-- [ ] Референсная реализация rate limiting
-- [ ] Защита от replay-атак
-- [ ] Симуляция транзакции перед отправкой
-- [ ] Security audit
-- [ ] Production deployment guide
+Продвинутые торговые функции — включая лимитные ордера, DCA, снипинг токенов и копи-трейдинг — намеренно выходят за рамки этого открытого стартер-кита.
+
+Эти функции требуют значительно более сложных механизмов исполнения, безопасности, надёжности и защиты от злоупотреблений, чем базовая инфраструктура кошелька, свопов и вывода средств, представленная здесь.
+
+Они могут быть разработаны отдельно как коммерческий продукт поверх этой открытой основы и не являются частью финансируемой дорожной карты этого репозитория.
 
 ---
 
-## Переиспользуемость
+## Назначение
 
-Проект выпущен как open source, чтобы другие разработчики могли изучить реализацию, переиспользовать её и построить поверх неё.
+Проект выпущен как open source, чтобы другие разработчики могли изучить реализацию, использовать его в качестве основы и надстраивать дополнительный функционал.
 
 Та же инфраструктура может поддержать другие Telegram-native приложения на Solana, не только этого бота — например:
 
