@@ -296,7 +296,7 @@ The starter kit is designed to demonstrate a safer architecture for Telegram-nat
 
 ### Current security model
 
-The Telegram bot does not store users' private keys in SQLite or in the application source code. Transaction signing is delegated to Openfort Backend Wallet infrastructure. The application stores the mapping between the Telegram user and the corresponding Openfort account / Solana wallet.
+The Telegram bot does not store users' private keys in SQLite or in the application source code. Transaction signing is delegated to Openfort Backend Wallet infrastructure. Each signing request is authenticated with a freshly generated JWT (a unique jti per request), which prevents replay of the same authentication request against the Openfort API. The application stores the mapping between the Telegram user and the corresponding Openfort account / Solana wallet.
 
 Sensitive application credentials are provided through environment variables and must never be committed to the repository.
 
@@ -310,8 +310,9 @@ Known limitations in the current implementation include:
 - withdrawal limits are not currently enforced;
 - there is no dedicated transaction history;
 - Telegram command rate limiting is not currently implemented;
-- replay protection beyond Solana's transaction/blockhash mechanics is not implemented;
-- transactions are not simulated before signing.
+- replay protection at the Solana transaction level (preventing the same swap or withdrawal from being submitted twice) beyond Solana's own blockhash expiry is not implemented — this is distinct from Openfort API request replay, which is already mitigated via per-request JWT nonces;
+- transactions are not simulated before signing;
+- secrets are currently provided via environment variables only; integration with a dedicated secret manager (e.g. AWS Secrets Manager, Google Secret Manager, HashiCorp Vault) for production deployments is not yet implemented.
 
 These limitations are intentionally documented so developers can clearly understand what the reference implementation does today and what still needs to be hardened before exposing it to real users with meaningful funds.
 
@@ -326,7 +327,9 @@ The roadmap focuses on a defined set of security improvements:
 - transaction simulation before signing;
 - structured transaction and security logging;
 - independently verified account recovery with anti-takeover safeguards;
-- independent security review and remediation of critical or high-risk findings.
+- independent security review and remediation of critical or high-risk findings;
+- wallet secret rotation policy for the Openfort signing key, leveraging Openfort's built-in rotation endpoint;
+- reference integration with a platform secret manager (AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault) for production secret storage.
 
 The goal is not to claim that the starter kit becomes universally "production secure". Instead, the project will provide a significantly stronger and better-documented security baseline that developers can evaluate and extend for their own applications.
 
@@ -357,7 +360,7 @@ The roadmap focuses on hardening the existing working implementation, improving 
 - [ ] Withdrawal confirmation step
 - [ ] Configurable withdrawal limits
 - [ ] Transaction history
-- [ ] Account recovery after Telegram ID change with independently verified ownership and anti-takeover protections
+- [ ] Account recovery after Telegram ID change using an independently verified recovery factor and anti-takeover protections
 - [ ] Support for additional SPL tokens with independently verified decimals
 - [ ] Token metadata and logos
 
@@ -370,6 +373,8 @@ The roadmap focuses on hardening the existing working implementation, improving 
 - [ ] Structured transaction and security logging
 - [ ] Independent security review
 - [ ] Remediation of critical and high-risk findings identified during the review
+- [ ] Wallet secret rotation policy (leveraging Openfort's rotation endpoint)
+- [ ] Reference integration with a platform secret manager for production secret storage
 
 ### Developer Experience
 
