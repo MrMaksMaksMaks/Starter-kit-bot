@@ -435,9 +435,10 @@ Copyright © 2026.
 
 ## Author
 
-Built by MAKSIM GORBUNOV
+Built by **MAKSIM GORBUNOV**
 
 Questions, feedback, or collaboration: jobpostgm@gmail.com
+
 ---
 
 ## 🇷🇺 Русский
@@ -569,7 +570,7 @@ Solana wallet/account создан
 Адрес возвращён пользователю, связка сохранена в SQLite
 ```
 
-**СПокупка / Продажа (своп)**С
+**Покупка / Продажа (своп)**
 
 ```text
 Telegram User
