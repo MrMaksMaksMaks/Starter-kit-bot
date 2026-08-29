@@ -21,16 +21,18 @@ Solana fits this use case specifically because interactions are cheap and fast e
 ## What works today
 
 | Feature | Status |
-|---|---|
-| Telegram bot | ✅ |
+|---------|--------|
+| Telegram bot (basic frontend) | ✅ |
 | Openfort Backend Wallet creation | ✅ |
-| SOL balance | ✅ |
-| SPL / Token-2022 balances | ✅ |
+| SOL balance check | ✅ Mainnet |
+| SPL / Token-2022 balances | ✅ Mainnet |
 | Jupiter swaps (buy/sell) | ✅ Mainnet |
 | Kora sponsored (gasless) withdrawals | ✅ |
 | Jupiter Referral (optional) | ✅ Mainnet |
 
 > For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
+
+> **Note:** Mainnet testing confirms that all core features work with real funds and live Solana infrastructure. Devnet is used for wallet creation and balance checks where applicable.
 
 ---
 
