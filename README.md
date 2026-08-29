@@ -46,13 +46,13 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 ## Demo
 
-| **Feature** | **Screenshot** |
-|-------------|----------------|
-| **Main Menu** | ![Main Menu](./images/Screenshot_Start.jpg) |
-| **Create Wallet** | ![Create Wallet](./images/Screenshot_Create_wallet.jpg) |
-| **Buy Tokens** | ![Buy Tokens](./images/Screenshot_Buy_USDC.jpg) |
-| **Check SOL Balance** | ![SOL Balance](./images/Screenshot_Balance.jpg) |
-| **View Token Balances** | ![Token Balances](./images/Screenshot_Tokens.jpg) |
+| Feature | Screenshot |
+|---------|------------|
+| **Main Menu** | <img src="./images/Screenshot_Start.jpg" width="300"/> |
+| **Create Wallet** | <img src="./images/Screenshot_Create_wallet.jpg" width="300"/> |
+| **Buy Tokens** | <img src="./images/Screenshot_Buy_USDC.jpg" width="300"/> |
+| **SOL Balance** | <img src="./images/Screenshot_Balance.jpg" width="300"/> |
+| **Token Portfolio** | <img src="./images/Screenshot_Tokens.jpg" width="300"/> |
 
 ---
 
