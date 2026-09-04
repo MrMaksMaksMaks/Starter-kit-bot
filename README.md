@@ -134,28 +134,25 @@ Address returned to user, mapping stored in SQLite
 │                  Rust / Teloxide Application                       │
 │                                                                    │
 │  /start  /create_wallet  /balance  /tokens  /buy  /sell  /withdraw │
+└─────────────────────────────┬────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                       Application Modules                          │
+│                                                                    │
+│   balance/   config/   db/   jupiter/   openfort/   solana/        │
+│   withdraw/                                                        │
 └───────────────┬───────────────────────┬────────────────────────────┘
                 │                       │
                 ▼                       ▼
 ┌─────────────────────────┐   ┌───────────────────────────────────┐
-│   Application Modules   │   │       External Infrastructure     │
+│        SQLite           │   │       External Infrastructure     │
 │                         │   │                                   │
-│ balance/                │   │ Openfort Backend Wallets          │
-│ config/                 │   │ Jupiter API                       │
-│ db/                     │   │ Kora                              │
-│ jupiter/                │   │ Solana RPC                        │
-│ openfort/               │   │                                   │
-│ solana/                 │   └───────────────────────────────────┘
-│ withdraw/               │
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│        SQLite           │
-│                         │
-│ User ↔ Wallet mapping   │
-│ Application state       │
-└─────────────────────────┘
+│ User ↔ Wallet mapping   │   │ Openfort Backend Wallets          │
+│ Application state       │   │ Jupiter API                       │
+└─────────────────────────┘   │ Kora                              │
+                               │ Solana RPC                        │
+                               └───────────────────────────────────┘
 ```
 
 ---
