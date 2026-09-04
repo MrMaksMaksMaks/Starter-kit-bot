@@ -69,18 +69,18 @@ async fn main() -> Result<()> {
 
     dotenv().ok();
 
-    info!("🚀 Starting Starter-Kit-Bot...");
+    info!(" Starting Starter-Kit-Bot...");
 
     let config = Config::from_env()?;
-    info!("✅ Configuration loaded");
-    info!("📊 Database URL: {}", config.database_url);
-    info!("🔗 Solana RPC: {}", config.solana_rpc_url);
-    info!("🔄 Jupiter API Key set: {}", !config.jupiter_api_key.is_empty());
+    info!(" Configuration loaded");
+    info!(" Database URL: {}", config.database_url);
+    info!(" Solana RPC: {}", config.solana_rpc_url);
+    info!(" Jupiter API Key set: {}", !config.jupiter_api_key.is_empty());
 
-    info!("📊 Initializing database...");
+    info!(" Initializing database...");
     let pool = db::init_pool(&config.database_url).await?;
     let repo = UserRepository::new(pool);
-    info!("✅ Database initialized");
+    info!(" Database initialized");
 
     let openfort = OpenfortClient::new(
         config.openfort_base_url.clone(),
@@ -88,11 +88,11 @@ async fn main() -> Result<()> {
         config.openfort_wallet_secret.clone(),
         config.openfort_publishable_key.clone(),
     );
-    info!("✅ Openfort client initialized");
+    info!(" Openfort client initialized");
 
     let bot = Bot::new(config.telegram_token.clone());
 
-    info!("🤖 Bot is running! Press Ctrl+C to stop.");
+    info!("✅ Bot is running! Press Ctrl+C to stop.");
 
     let handler = move |bot: Bot, msg: Message| {
         let repo = repo.clone();
@@ -103,7 +103,7 @@ async fn main() -> Result<()> {
             let chat_id = msg.chat.id;
             let telegram_id = msg.chat.id.0 as i64;
 
-            println!("📝 Received: {}", text);
+            println!(" Received: {}", text);
 
             // ============================
             // /start
@@ -111,7 +111,7 @@ async fn main() -> Result<()> {
             if text == "/start" {
                 bot.send_message(
                     chat_id,
-                    "🚀 Welcome to Solana-kit-bot!\n\n\
+                    "🤖 Welcome to Solana-kit-bot!\n\n\
                     Commands:\n\
                     /create_wallet - Create a wallet\n\
                     /balance - Check SOL balance\n\

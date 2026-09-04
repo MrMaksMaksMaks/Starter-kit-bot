@@ -26,9 +26,13 @@ Per Openfort's own classification, the backend-wallet pattern used here is **cus
 
 End users have no independent signing capability of their own; the application, through Openfort, holds full authorization control. The security work described in this document — and funded through the project's roadmap — is about hardening the trust boundaries of that custody model, not about claiming the architecture avoids custody altogether.
 
-**Custody here specifically means authorization control, not possession of raw key material:** the application itself never stores or directly accesses private keys. Signing is delegated to Openfort Backend Wallet infrastructure, where key material is protected inside a TEE and never leaves that environment — the bot backend can initiate authorized signing requests, but it never receives or handles private key material itself. Each authenticated request to Openfort carries a freshly generated nonce (`jti`), which already mitigates replay of the same signing-authentication request today.
+**Custody here specifically means authorization control, not possession of raw key material:** the application itself never stores or directly accesses private keys. Signing is delegated to Openfort Backend Wallet infrastructure, where key material is designed to be protected by Openfort's secure signing environment (TEE). The project does not assume that this eliminates all key-material export or administrative paths: Openfort exposes separate wallet-share export capabilities, which are therefore treated as part of the credential and trust-boundary analysis.
 
-This distinction matters: TEE protection prevents key *extraction*, but it does not, by itself, make the application backend a trusted-by-default component for *authorization*.
+The private_key_shares:export scope is explicitly omitted from all runtime credentials (Key A, Key B, and Key C), ensuring that even with full compromise of application-layer components, private key material cannot be extracted from Openfort's TEE environment.
+
+The bot backend can initiate authorized signing requests, but it never receives or handles private key material itself. Each authenticated request to Openfort carries a freshly generated nonce (`jti`), which mitigates replay of the same API authentication request at the Openfort layer. This is distinct from blockchain-level transaction replay, which is handled by Solana's blockhash expiry.
+
+This distinction matters: TEE protection prevents key extraction, but it does not, by itself, make the application backend a trusted-by-default component for authorization. The separation of credentials (signing vs. policy management vs. security administration) ensures that compromise of any single component does not grant full system control.
 
 ---
 
@@ -62,6 +66,8 @@ The table below makes Layer 3's boundary concrete — specifically, what an atta
 | Openfort signing infrastructure | TEE boundary | Depends on Openfort's own controls | Depends on Openfort's own controls | Depends on Openfort's own controls |
 
 *\*assuming Key C is genuinely provisioned without `accounts:sign`.*
+
+> **Private key export is explicitly disabled at the scope level.** All runtime credentials are provisioned without the `private_key_shares:export` scope. This is an explicit security requirement, not an assumption — it ensures that even with full compromise of application-layer components, the attacker cannot extract private key material from Openfort's TEE environment. The only way to obtain private keys would require compromising the TEE itself, which is outside the application's threat model and is independently secured by Openfort's infrastructure.
 
 ### Unverified assumption
 
