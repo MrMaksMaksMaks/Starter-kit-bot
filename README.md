@@ -134,7 +134,7 @@ Address returned to user, mapping stored in SQLite
 │                  Rust / Teloxide Application                       │
 │                                                                    │
 │  /start  /create_wallet  /balance  /tokens  /buy  /sell  /withdraw │
-└─────────────────────────────┬────────────────────────────────────┘
+└─────────────────────────────┬──────────────────────────────────────┘
                               │
                               ▼
 ┌────────────────────────────────────────────────────────────────────┐
@@ -151,8 +151,8 @@ Address returned to user, mapping stored in SQLite
 │ User ↔ Wallet mapping   │   │ Openfort Backend Wallets          │
 │ Application state       │   │ Jupiter API                       │
 └─────────────────────────┘   │ Kora                              │
-                               │ Solana RPC                        │
-                               └───────────────────────────────────┘
+                              │ Solana RPC                        │
+                              └───────────────────────────────────┘
 ```
 
 ---
