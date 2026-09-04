@@ -9,7 +9,7 @@ A reusable, open-source reference implementation for building Telegram-native So
 This repository is actively maintained as **open-source public infrastructure** for the Solana developer ecosystem.
 
 **Current state:** Working implementation on Solana mainnet (see [Live mainnet proof](#live-mainnet-proof)).  
-**Funded roadmap:** Security hardening, account recovery, independent security review, operational reliability, and production documentation — [details below](#roadmap).
+**Proposed roadmap:** Security hardening, account recovery, independent security review, operational reliability, and production documentation — [details below](#roadmap).
 
 The project is **not a commercial trading product**. Advanced trading features (limit orders, DCA, sniping, copy trading) are explicitly out of scope and will not be added to this open-source repository.
 
@@ -55,13 +55,13 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 ## Demo
 
-| Feature | Screenshot |
-|---------|------------|
-| **Main Menu** | <img src="./images/Screenshot_Start.jpg" width="300"/> |
-| **Create Wallet** | <img src="./images/Screenshot_Create_wallet.jpg" width="300"/> |
-| **Buy Tokens** | <img src="./images/Screenshot_Buy_USDC.jpg" width="300"/> |
-| **SOL Balance** | <img src="./images/Screenshot_Balance.jpg" width="300"/> |
-| **Token Portfolio** | <img src="./images/Screenshot_Tokens.jpg" width="300"/> |
+| Feature| Screenshot|
+| ---| ---|
+| **Main Menu**| <img src="assets/demo-start.png" width="400">|
+| **Create Wallet**| <img src="assets/demo-wallet.png" width="400">|
+| **Buy Tokens**| <img src="assets/demo-buy.png" width="400">|
+| **SOL Balance**| <img src="assets/demo-balance.png" width="400">|
+| **Token Portfolio**| <img src="assets/demo-tokens.png" width="400">|
 
 ---
 
@@ -340,7 +340,7 @@ The roadmap focuses on hardening the existing working implementation into a reus
 | M5 | Testing, developer experience & reproducibility | Planned |
 | M6 | Documentation, secret rotation, provider abstraction boundary, production deployment guide | Planned |
 
-Advanced trading features — limit orders, DCA, token sniping, and copy trading — are intentionally out of scope for this open-source repository. They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the funded roadmap.
+Advanced trading features — limit orders, DCA, token sniping, and copy trading — are intentionally out of scope for this open-source repository. They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the proposed roadmap.
 
 ---
 

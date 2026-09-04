@@ -4,7 +4,7 @@ Security is a core design consideration of this project and an area of active, o
 
 This repository is, at its core, a reference architecture for a specific and under-documented class of problem: what happens when a messaging application's identity — a Telegram account — becomes the primary user interface and authorization entry point to a managed, backend-controlled Solana wallet. That framing, not "a Telegram trading bot," is the actual contribution this project makes to the Solana developer ecosystem.
 
-> **Scope:** This document describes the security model, known limitations, and planned hardening of the Solana Starter Kit Bot. It is a living document that will be updated as the [funded roadmap](../README.md#roadmap) progresses.
+> **Scope:** This document describes the security model, known limitations, and planned hardening of the Solana Starter Kit Bot. It is a living document that will be updated as the [proposed roadmap](../README.md#roadmap) progresses.
 
 ---
 
@@ -37,7 +37,7 @@ The intended production configuration is to provision runtime credentials accord
 
 The project will independently verify the exact semantics of these permissions, the applicability of policy controls to Solana backend wallets, and the behavior of the system under compromised application credentials.
 
-**The central security distinction** is between key protection and signing authorization: protecting key material inside the signing infrastructure does not, by itself, prevent a compromised backend from requesting an unauthorized signature. The funded security work therefore focuses on reducing the authorization surface and documenting which protections remain effective after different levels of backend compromise.
+**The central security distinction** is between key protection and signing authorization: protecting key material inside the signing infrastructure does not, by itself, prevent a compromised backend from requesting an unauthorized signature. This proposed security work therefore focuses on reducing the authorization surface and documenting which protections remain effective after different levels of backend compromise.
 
 ---
 
@@ -73,7 +73,7 @@ Withdrawal confirmation, limits, address validation, transaction simulation, rat
 ### Layer 3 — Wallet Infrastructure
 Openfort Backend Wallet infrastructure, its documented secure signing environment, Policy V2 controls where applicable, and credential-level restrictions. This layer is **intended** to provide constraints that remain outside the application's transaction-authorization logic.
 
-A core part of the funded work is to verify which of these controls are actually enforced for Solana backend wallets and how they behave under compromised application credentials.
+A core part of the proposed work is to verify which of these controls are actually enforced for Solana backend wallets and how they behave under compromised application credentials.
 
 Within Layer 3, the project further distinguishes:
 
@@ -97,7 +97,7 @@ Openfort is the current wallet infrastructure provider used by this reference im
 
 The project does not currently claim to be provider-agnostic — the working code (message-vs-full-transaction signing, `X-Wallet-Auth` JWT construction, payload encoding, API version differences) is Openfort-specific. What the project does commit to: isolating that specificity behind a clear internal boundary (see [Roadmap](../README.md#roadmap), M6 — Wallet provider abstraction boundary), documenting which parts of the security model are Openfort-specific versus generic to any backend-wallet provider, and, during the M4 security-hardening work, comparing the architecture conceptually against alternative Solana wallet/signing infrastructure (such as Turnkey and Crossmint) to identify which of this implementation's assumptions are provider-specific rather than general.
 
-This is a comparative documentation exercise, not a commitment to build or maintain a second working provider integration — doing so would meaningfully expand scope beyond what the funded roadmap covers.
+This is a comparative documentation exercise, not a commitment to build or maintain a second working provider integration — doing so would meaningfully expand scope beyond what the proposed roadmap covers.
 
 ```
          Telegram / Application
@@ -158,7 +158,7 @@ The table below makes Layer 3's boundary concrete — specifically, what an atta
 
 ### Unverified assumption
 
-This table depends on an assumption that is explicitly **not yet verified** and is itself part of the funded work (M4): whether Key B (scoped to `policies:write`, without `policies:delete`) can attach a new, more permissive policy to an *existing* wallet that already has a policy attached — and, if so, how Openfort's project-level and account-level policies are combined or take precedence over one another.
+This table depends on an assumption that is explicitly **not yet verified** and is itself part of the proposed work (M4): whether Key B (scoped to `policies:write`, without `policies:delete`) can attach a new, more permissive policy to an *existing* wallet that already has a policy attached — and, if so, how Openfort's project-level and account-level policies are combined or take precedence over one another.
 
 If a compromised Key B can effectively override an existing wallet's policy by creating a new one, credential scoping alone does not close this gap, and the fixed, non-arbitrary provisioning workflow described in M4 becomes the primary control, not a secondary one.
 
