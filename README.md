@@ -307,11 +307,11 @@ Security is a core design consideration of the project and an area of active, on
 The starter kit is designed to demonstrate a safer architecture for Telegram-native Solana applications, while being explicit about the security boundaries of the current implementation.
 
 - The Telegram bot does **not** store users' private keys in SQLite or in the application source code.
-- Transaction signing is delegated to Openfort Backend Wallet infrastructure.
-- Each signing request is authenticated with a freshly generated JWT (a unique `jti` per request), which prevents replay of the same authentication request against the Openfort API.
+- Transaction signing is delegated to **Openfort Backend Wallet** infrastructure.
+- Each authenticated request to Openfort includes a freshly generated unique `jti`. The project treats Openfort's server-side validation of this value as part of the provider trust-boundary verification rather than assuming that the presence of `jti` alone constitutes replay protection.
 - The application stores the mapping between the Telegram user and the corresponding Openfort account / Solana wallet.
 
-**→ Full threat model, credential-scoping analysis, known limitations, and planned hardening:** [`SECURITY.md`](./SECURITY.md)
+**→ Full threat model, credential-scoping analysis, key-material export boundaries, known limitations, and planned hardening:** [`SECURITY.md`](./SECURITY.md)
 
 ---
 
@@ -334,11 +334,11 @@ The roadmap focuses on hardening the existing working implementation into a reus
 | Phase | Focus | Status |
 |---|---|---|
 | M1 | Transaction safety controls (confirmation, limits, validation, replay protection, history, logging) | Planned |
-| M2 | Account recovery & anti-takeover (TOTP, backup codes, cooldowns, audit logging) | Planned |
+| M2 | Account recovery & anti-takeover (TOTP, backup codes, cooldowns, notification, audit logging) | Planned |
 | M3 | Independent security review & remediation | Planned |
-| M4 | Infrastructure hardening (RPC failover, least-privilege credentials, provider abstraction boundary) | Planned |
+| M4 | Infrastructure hardening (RPC failover, least-privilege credentials, key-share export verification) | Planned |
 | M5 | Testing, developer experience & reproducibility | Planned |
-| M6 | Documentation, secret rotation, production deployment guide | Planned |
+| M6 | Documentation, secret rotation, provider abstraction boundary, production deployment guide | Planned |
 
 Advanced trading features — limit orders, DCA, token sniping, and copy trading — are intentionally out of scope for this open-source repository. They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the funded roadmap.
 
