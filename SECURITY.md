@@ -131,10 +131,12 @@ The intended production credential configuration is summarized below. Exact Open
 |---|---|---|---|
 | **Key A — Runtime Secret** | Normal wallet/account operations and authorized signing | Minimum required `accounts:*` / `transaction:*` scopes | `policies:write`, `policies:delete`, `private_key_shares:export`, API-key management |
 | **Key B — Policy Provisioning** | Provisioning of predefined wallet policies | Minimum policy-management scope required after verification | `accounts:sign`, `private_key_shares:export` |
-| **Key C — Security Administration** | Manual security administration | Policy administration only | `accounts:sign` |
+| **Key C — Security Administration** | Manual security administration | Policy administration only | `accounts:sign`, `private_key_shares:export` |
 | **Wallet Secret** | Backend-wallet signing authentication (JWT for `X-Wallet-Auth`) | Required by Openfort signing flow | Never exposed to users or application input |
 
 > **Note:** Key A is a secret credential even though it carries limited scopes. It is never "public."
+
+> **Design decision — export denied by default, for every credential.** No credential provisioned for this project — including the security-administration credential (Key C, otherwise the most privileged) — is granted `private_key_shares:export`. This is a deliberate provisioning choice, not an oversight: it closes the export path entirely at the credential level, for every key in the project, independent of the separate and still-open question (see Key Material and Export Boundary above) of whether a single exported share would even be sufficient on its own to reconstruct a usable signing key. If `TEE-only signing` is claimed anywhere in this project's materials, it is true specifically because export is denied to every credential — not because export is technically impossible for a credential that were granted it.
 
 > **Unverified assumption — shared wallet secret.** Openfort documents only one active wallet secret per project at a time. If Keys A, B, and C all authenticate their `X-Wallet-Auth` JWTs using that same shared wallet secret, compromise of the wallet secret itself may be sufficient to forge a valid signing-authorization request regardless of which Bearer-scoped API key is otherwise used — independent of the credential-isolation work above. This is an explicit, separate verification item (M4), not assumed away by scope separation alone.
 
