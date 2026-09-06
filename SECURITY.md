@@ -2,7 +2,7 @@
 
 Security is a core design consideration of this project and an area of active, ongoing work.
 
-This repository is, at its core, a reference architecture for a specific and under-documented class of problem: what happens when a messaging application's identity — a Telegram account — becomes the primary user interface and authorization entry point to a managed, backend-controlled Solana wallet. That framing, not "a Telegram trading bot," is the actual contribution this project makes to the Solana developer ecosystem.
+This repository is, at its core, a reference architecture for a specific and under-documented class of problem: what happens when a messaging application's identity — a Telegram account — becomes the primary user interface and authorization entry point to a managed, backend-controlled Solana wallet. That framing is the actual contribution this project makes to the Solana developer ecosystem — the interesting engineering problem here is the identity/authorization boundary itself, ahead of the trading-bot UI wrapped around it.
 
 > **Scope:** This document describes the security model, known limitations, and planned hardening of the Solana Starter Kit Bot. It is a living document that will be updated as the [proposed roadmap](../README.md#roadmap) progresses.
 
@@ -95,7 +95,7 @@ Openfort
 
 Openfort is the current wallet infrastructure provider used by this reference implementation. It is not treated as a trusted-by-default security boundary, and its specific implementation is not assumed to be the security model of the application.
 
-The project does not currently claim to be provider-agnostic — the working code (message-vs-full-transaction signing, `X-Wallet-Auth` JWT construction, payload encoding, API version differences) is Openfort-specific. What the project does commit to: isolating that specificity behind a clear internal boundary (see [Roadmap](../README.md#roadmap), M6 — Wallet provider abstraction boundary), documenting which parts of the security model are Openfort-specific versus generic to any backend-wallet provider, and, during the M4 security-hardening work, comparing the architecture conceptually against alternative Solana wallet/signing infrastructure (such as Turnkey and Crossmint) to identify which of this implementation's assumptions are provider-specific rather than general.
+The project does not currently claim to be provider-agnostic — the working code (message-vs-full-transaction signing, `X-Wallet-Auth` JWT construction, payload encoding, API version differences) is Openfort-specific. What the project does commit to: isolating that specificity behind a clear internal boundary (see [Roadmap](../README.md#roadmap), M6 — Wallet provider abstraction boundary), documenting which parts of the security model are Openfort-specific versus generic to any backend-wallet provider, and, during the M4 security-hardening work, comparing the architecture conceptually against alternative Solana wallet/signing infrastructure (such as Turnkey and Crossmint) to identify which of this implementation's assumptions are specific to Openfort versus common to any backend-wallet provider.
 
 This is a comparative documentation exercise, not a commitment to build or maintain a second working provider integration — doing so would meaningfully expand scope beyond what the proposed roadmap covers.
 
@@ -138,13 +138,13 @@ The intended production credential configuration is summarized below. Exact Open
 
 > **Design decision — export denied by default, for every credential.** No credential provisioned for this project — including the security-administration credential (Key C, otherwise the most privileged) — is granted `private_key_shares:export`. This is a deliberate provisioning choice, not an oversight: it closes the export path entirely at the credential level, for every key in the project, independent of the separate and still-open question (see Key Material and Export Boundary above) of whether a single exported share would even be sufficient on its own to reconstruct a usable signing key. If `TEE-only signing` is claimed anywhere in this project's materials, it is true specifically because export is denied to every credential — not because export is technically impossible for a credential that were granted it.
 
-> **Unverified assumption — shared wallet secret.** Openfort documents only one active wallet secret per project at a time. If Keys A, B, and C all authenticate their `X-Wallet-Auth` JWTs using that same shared wallet secret, compromise of the wallet secret itself may be sufficient to forge a valid signing-authorization request regardless of which Bearer-scoped API key is otherwise used — independent of the credential-isolation work above. This is an explicit, separate verification item (M4), not assumed away by scope separation alone.
+> **Unverified assumption — shared wallet secret.** Openfort documents only one active wallet secret per project at a time. If Keys A, B, and C all authenticate their `X-Wallet-Auth` JWTs using that same shared wallet secret, compromise of the wallet secret itself may be sufficient to forge a valid signing-authorization request regardless of which Bearer-scoped API key is otherwise used — independent of the credential-isolation work above. This is an explicit, separate verification item (M4) — scope separation alone does not resolve it.
 
 ---
 
 ## Compromised Component Analysis
 
-The table below makes Layer 3's boundary concrete — specifically, what an attacker gains from compromising each individual component of the system, rather than a generic "backend compromise":
+The table below makes Layer 3's boundary concrete by breaking down exactly what an attacker gains from compromising each individual component of the system:
 
 | Compromised component | Can sign? | Modify policies? | Delete policies? | Export key shares? |
 |---|---|---|---|---|
@@ -160,7 +160,7 @@ The table below makes Layer 3's boundary concrete — specifically, what an atta
 
 This table depends on an assumption that is explicitly **not yet verified** and is itself part of the proposed work (M4): whether Key B (scoped to `policies:write`, without `policies:delete`) can attach a new, more permissive policy to an *existing* wallet that already has a policy attached — and, if so, how Openfort's project-level and account-level policies are combined or take precedence over one another.
 
-If a compromised Key B can effectively override an existing wallet's policy by creating a new one, credential scoping alone does not close this gap, and the fixed, non-arbitrary provisioning workflow described in M4 becomes the primary control, not a secondary one.
+If a compromised Key B can effectively override an existing wallet's policy by creating a new one, credential scoping alone does not close this gap, and the fixed, non-arbitrary provisioning workflow described in M4 becomes the primary control for this specific risk.
 
 ---
 
@@ -172,7 +172,7 @@ This repository is a working starter kit, not a fully hardened production system
 - Withdrawal limits are not currently enforced.
 - There is no dedicated transaction history.
 - Telegram command rate limiting is not currently implemented.
-- Replay protection at the Solana transaction level (preventing the same swap or withdrawal from being submitted twice) beyond Solana's own blockhash expiry is not implemented — this is distinct from Openfort API request replay: each signing request includes a freshly generated JWT nonce (`jti`), but whether Openfort's server actually validates and rejects reused `jti` values has not been independently confirmed. This is treated as an assumption to verify during M4/M3, not a proven guarantee.
+- Replay protection at the Solana transaction level (preventing the same swap or withdrawal from being submitted twice) beyond Solana's own blockhash expiry is not implemented — this is distinct from Openfort API request replay: each signing request includes a freshly generated JWT nonce (`jti`), and whether Openfort's server actually validates and rejects reused `jti` values remains an open item to verify during M3/M4.
 - Transactions are not simulated before signing.
 - There is no recovery path if a user's Telegram identity changes or is lost.
 - Secrets are currently provided via environment variables only; integration with a dedicated secret manager (e.g. AWS Secrets Manager, Google Secret Manager, HashiCorp Vault) for production deployments is not yet implemented.
@@ -196,7 +196,7 @@ The roadmap focuses on a defined set of security improvements:
 - Wallet secret rotation policy for the Openfort signing key, leveraging Openfort's built-in rotation endpoint.
 - Reference integration with a platform secret manager (AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault) for production secret storage.
 - Verification of whether Keys A, B, and C share a single underlying Openfort wallet secret, and documentation of how that affects the credential-isolation model (see Credentials and Scope Model above).
-- Verification of whether Openfort's server actually enforces uniqueness on the `jti` nonce carried by each `X-Wallet-Auth` JWT — i.e., whether a replayed request with a previously-used `jti` is rejected — rather than presenting the nonce's presence alone as proven replay protection.
+- Verification of whether Openfort's server actually enforces uniqueness on the `jti` nonce carried by each `X-Wallet-Auth` JWT — confirming or ruling out real replay protection at the request-authentication level.
 - A documented internal boundary isolating Openfort-specific integration code from application-level security logic (see Provider Independence above).
 
 The goal is not to claim that the starter kit becomes universally "production secure." Instead, the project will provide a significantly stronger and better-documented security baseline that developers can evaluate and extend for their own applications.
@@ -217,7 +217,7 @@ Recovery therefore protects the identity-to-account association, not the private
 
 ### Design principles
 
-- **TOTP-based recovery factor**, generated and confirmed once at wallet creation (QR code shown a single time, never re-displayed).
+- **TOTP-based recovery factor**, generated and confirmed once at wallet creation (QR code sent once; the bot deletes the message shortly after setup is confirmed).
 - **High-entropy, single-use backup codes**, generated at the same time, shown once, stored only as hashes — not as a substitute for TOTP, but as a documented fallback if the authenticator device is lost.
 - Recovery is initiated from a new Telegram identity by supplying a recovery identifier plus a valid TOTP code or an unused backup code.
 - A **recovery cooldown period** before the new Telegram identity is bound, giving the legitimate owner a window to notice and cancel an unauthorized attempt.
@@ -229,7 +229,7 @@ Recovery therefore protects the identity-to-account association, not the private
 
 ### Scope control
 
-The project will not require a third-party identity provider for the initial recovery implementation. The goal is a self-contained reference architecture using standard, well-understood primitives (TOTP, hashed backup codes) rather than novel cryptography, extensible later with stronger external identity mechanisms if a production application requires them.
+The project will not require a third-party identity provider for the initial recovery implementation. The goal is a self-contained reference architecture using standard, well-understood primitives (TOTP, hashed backup codes), extensible later with stronger external identity mechanisms if a production application requires them.
 
 ---
 
