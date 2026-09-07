@@ -6,8 +6,6 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 **On sequencing:** Milestones below are listed with approximate month numbers, but they are sequential, completion-triggered phases, not fixed calendar slots. Each milestone begins once the previous one is complete and accepted. M3 in particular depends on a third-party security firm's availability, which is not fully within the maintainer's control — its actual start date tracks M1–M2's real completion, not the calendar alone. If M3 is delayed, M4 and M5 can proceed in parallel during the wait, since neither modifies the code M3 reviews (see M3's note below).
 
-**Funding note:** This roadmap is submitted as part of a funding application to the Solana Foundation. It represents the project's intended direction regardless of that application's outcome; the pace of execution depends on whether — and how — the work is funded.
-
 ---
 
 ## M1 — Transaction Security & Safety Controls
