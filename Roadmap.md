@@ -8,7 +8,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M1: Transaction Security & Safety Controls
+## M1: Transaction Security and Safety Controls
 **Month 1**
 
 **Goal:** Move from "the transaction works" to "the transaction flow has basic safety controls" - the minimum needed before real users should be trusted with real funds.
@@ -28,7 +28,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M2: Account Recovery & Anti-Takeover Protection
+## M2: Account Recovery and Anti-Takeover Protection
 **Month 2**
 
 **Goal:** Make the Telegram-identity-to-wallet association recoverable while minimizing the risk of unauthorized account takeover.
@@ -53,7 +53,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M3: Independent Security Review & Remediation
+## M3: Independent Security Review and Remediation
 **Month 3 (target)**
 
 **Goal:** Obtain independent, external security scrutiny of the highest-risk code — wallet association, signing, withdrawal, and recovery — completed in M1 and M2, before further feature work builds on top of it.
@@ -72,7 +72,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M4: Infrastructure Hardening & Operational Reliability
+## M4: Infrastructure Hardening and Operational Reliability
 **Month 4**
 
 **Goal:** Move from a single-provider, undocumented operational setup to a more resilient reference deployment architecture, and reduce the authorization surface that a compromised application backend could exploit.
@@ -111,7 +111,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M5: Testing, Developer Experience & Reproducibility
+## M5: Testing, Developer Experience and Reproducibility
 **Month 5**
 
 **Deliverables**
@@ -126,7 +126,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M6: Documentation, Operational Hardening & Public Release
+## M6: Documentation, Operational Hardening and Public Release
 **Month 6**
 
 **Deliverables**
