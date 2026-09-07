@@ -4,28 +4,13 @@ use starter_kit_bot::balance;
 use starter_kit_bot::config::Config;
 use starter_kit_bot::db::{self, models::NewUser, repository::UserRepository};
 use starter_kit_bot::jupiter;
+use starter_kit_bot::markdown::escape_markdown_v2;
 use starter_kit_bot::openfort::OpenfortClient;
 use starter_kit_bot::solana;
 use starter_kit_bot::withdraw;
 use teloxide::prelude::*;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-
-/// Escapes special MarkdownV2 characters in dynamic data before inserting into a message.
-fn escape_markdown_v2(text: &str) -> String {
-    const SPECIAL: &[char] = &[
-        '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=',
-        '|', '{', '}', '.', '!',
-    ];
-    let mut escaped = String::with_capacity(text.len());
-    for c in text.chars() {
-        if SPECIAL.contains(&c) {
-            escaped.push('\\');
-        }
-        escaped.push(c);
-    }
-    escaped
-}
 
 /// Formats a raw amount (in smallest units, as a string) into a human-readable format
 /// with decimals — for example, "1500000" with decimals=6 becomes "1.5"
