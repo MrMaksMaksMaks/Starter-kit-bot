@@ -1,24 +1,24 @@
 # Roadmap
 
-This document describes the planned hardening work for Solana Starter Kit Bot in technical detail — what each milestone delivers, why it's scoped the way it is, and how the milestones depend on each other. It intentionally does not include budget figures; those are part of a funding application to the Solana Foundation, not something that should live in a file that's expected to stay accurate regardless of that application's outcome.
+This document describes the planned hardening work for Solana Starter Kit Bot in technical detail - what each milestone delivers, why it's scoped the way it is, and how the milestones depend on each other. It intentionally does not include budget figures.
 
-**Scope:** This roadmap focuses on hardening the existing working implementation into a reusable, security-reviewed foundation — not a full-featured trading platform. Advanced trading features (limit orders, DCA, token sniping, copy trading) are intentionally out of scope for this repository; see the main [README](./README.md#roadmap) for why.
+**Scope:** This roadmap focuses on hardening the existing working implementation into a reusable, security-reviewed foundation, not a full-featured trading platform. Advanced trading features (limit orders, DCA, token sniping, copy trading) are intentionally out of scope for this repository; see the main [README](./README.md#roadmap) for why.
 
-**On sequencing:** Milestones below are listed with approximate month numbers, but they are sequential, completion-triggered phases, not fixed calendar slots. Each milestone begins once the previous one is complete and accepted. M3 in particular depends on a third-party security firm's availability, which is not fully within the maintainer's control — its actual start date tracks M1–M2's real completion, not the calendar alone. If M3 is delayed, M4 and M5 can proceed in parallel during the wait, since neither modifies the code M3 reviews (see M3's note below).
+**On sequencing:** Milestones below are listed with approximate month numbers, but they are sequential, completion-triggered phases, not fixed calendar slots. Each milestone begins once the previous one is complete and accepted. M3 in particular depends on a third-party security firm's availability, which is not fully within the maintainer's control - its actual start date tracks M1–M2's real completion, not the calendar alone. If M3 is delayed, M4 and M5 can proceed in parallel during the wait, since neither modifies the code M3 reviews (see M3's note below).
 
 ---
 
-## M1 — Transaction Security & Safety Controls
+## M1: Transaction Security & Safety Controls
 **Month 1**
 
-**Goal:** Move from "the transaction works" to "the transaction flow has basic safety controls" — the minimum needed before real users should be trusted with real funds.
+**Goal:** Move from "the transaction works" to "the transaction flow has basic safety controls" - the minimum needed before real users should be trusted with real funds.
 
 **Deliverables**
 - Withdrawal confirmation using Telegram inline keyboards.
 - Configurable withdrawal limits, with clear user feedback when a limit is exceeded.
 - Solana address validation before transaction construction; malformed or invalid destinations are rejected before signing.
 - Rate limiting for sensitive bot commands, with stronger limits on withdrawal and transaction-related operations.
-- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which is already mitigated today via per-request JWT nonces — this closes the separate gap at the transaction-submission level.)
+- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which is already mitigated today via per-request JWT nonces - this closes the separate gap at the transaction-submission level.)
 - Transaction history for supported wallet operations: withdrawals, swaps, signatures, timestamps, status.
 - Structured transaction and security logging.
 - Initial security baseline and threat-model documentation.
@@ -28,7 +28,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M2 — Account Recovery & Anti-Takeover Protection
+## M2: Account Recovery & Anti-Takeover Protection
 **Month 2**
 
 **Goal:** Make the Telegram-identity-to-wallet association recoverable while minimizing the risk of unauthorized account takeover.
@@ -53,7 +53,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M3 — Independent Security Review & Remediation
+## M3: Independent Security Review & Remediation
 **Month 3 (target)**
 
 **Goal:** Obtain independent, external security scrutiny of the highest-risk code — wallet association, signing, withdrawal, and recovery — completed in M1 and M2, before further feature work builds on top of it.
@@ -72,7 +72,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M4 — Infrastructure Hardening & Operational Reliability
+## M4: Infrastructure Hardening & Operational Reliability
 **Month 4**
 
 **Goal:** Move from a single-provider, undocumented operational setup to a more resilient reference deployment architecture, and reduce the authorization surface that a compromised application backend could exploit.
@@ -111,7 +111,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M5 — Testing, Developer Experience & Reproducibility
+## M5: Testing, Developer Experience & Reproducibility
 **Month 5**
 
 **Deliverables**
@@ -126,7 +126,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 ---
 
-## M6 — Documentation, Operational Hardening & Public Release
+## M6: Documentation, Operational Hardening & Public Release
 **Month 6**
 
 **Deliverables**
