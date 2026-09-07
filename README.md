@@ -269,7 +269,7 @@ Then, in Telegram:
 
 ## Configuration
 
-| Variable| Must be set?| Description|S
+| Variable| Must be set?| Description|
 | ---| ---| ---|
 | `TELEGRAM_BOT_TOKEN`| Yes| Token from @BotFather|
 | `OPENFORT_SECRET_KEY`| Yes| Openfort project secret key (`sk_...`)|
