@@ -8,18 +8,36 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
+use std::sync::Arc;
 use std::time::Duration;
 use uuid::Uuid;
 
 use crate::crypto::der_base64_to_pem;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct OpenfortClient {
     base_url: String,
     secret_key: String,
-    wallet_secret: String,
     publishable_key: String,
+    // Parsed once in `new()`, not re-derived per request — see README/ROADMAP
+    // "Known Integration Gotchas" and the M6 wallet-secret-rotation note for why
+    // this means a rotated secret requires a bot restart to take effect.
+    signing_key: Arc<EncodingKey>,
     http_client: Client,
+}
+
+// Manual Debug impl: `secret_key` (Bearer token) and `signing_key` (ES256 private
+// key material) must never be printed in full, even accidentally via `{:?}`.
+impl std::fmt::Debug for OpenfortClient {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("OpenfortClient")
+            .field("base_url", &self.base_url)
+            .field("secret_key", &"[redacted]")
+            .field("publishable_key", &self.publishable_key)
+            .field("signing_key", &"[redacted]")
+            .field("http_client", &self.http_client)
+            .finish()
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -48,25 +66,36 @@ struct SignResponse {
 }
 
 impl OpenfortClient {
+    /// Builds the client and eagerly parses `wallet_secret` into a signing key.
+    ///
+    /// Returns `Result` (rather than a bare `Self`) specifically so an invalid
+    /// `OPENFORT_WALLET_SECRET` fails loudly at startup — before any user has a
+    /// chance to hit `/create_wallet` — instead of failing deep inside the first
+    /// real request.
     pub fn new(
         base_url: String,
         secret_key: String,
         wallet_secret: String,
         publishable_key: String,
-    ) -> Self {
+    ) -> Result<Self> {
         let http_client = Client::builder()
             .timeout(Duration::from_secs(30))
             .connect_timeout(Duration::from_secs(10))
             .build()
             .expect("Failed to build HTTP client");
 
-        Self {
+        // wallet_secret is only needed transiently here, to produce signing_key —
+        // it is not retained on the struct afterward.
+        let pem_key = der_base64_to_pem(&wallet_secret, "PRIVATE KEY")?;
+        let signing_key = EncodingKey::from_ec_pem(pem_key.as_bytes())?;
+
+        Ok(Self {
             base_url,
             secret_key,
-            wallet_secret,
             publishable_key,
+            signing_key: Arc::new(signing_key),
             http_client,
-        }
+        })
     }
 
     // ------------------------------------------------------------------
@@ -94,9 +123,9 @@ impl OpenfortClient {
         };
 
         let header = Header::new(Algorithm::ES256);
-        let pem_key = der_base64_to_pem(&self.wallet_secret, "PRIVATE KEY")?;
-        let key = EncodingKey::from_ec_pem(pem_key.as_bytes())?;
-        let jwt = jsonwebtoken::encode(&header, &payload, &key)?;
+        // signing_key was parsed once in `new()` — no per-request DER/PEM
+        // decoding or EC key parsing happens here anymore.
+        let jwt = jsonwebtoken::encode(&header, &payload, &self.signing_key)?;
         Ok(jwt)
     }
 

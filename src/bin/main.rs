@@ -82,12 +82,16 @@ async fn main() -> Result<()> {
     let repo = UserRepository::new(pool);
     info!(" Database initialized");
 
+    // OpenfortClient::new() now returns Result: it eagerly parses
+    // OPENFORT_WALLET_SECRET (Base64 DER -> PEM -> EncodingKey) once at
+    // construction. An invalid secret now fails loudly here, at startup,
+    // instead of surfacing deep inside the first /create_wallet or /buy call.
     let openfort = OpenfortClient::new(
         config.openfort_base_url.clone(),
         config.openfort_secret_key.clone(),
         config.openfort_wallet_secret.clone(),
         config.openfort_publishable_key.clone(),
-    );
+    )?;
     info!(" Openfort client initialized");
 
     let bot = Bot::new(config.telegram_token.clone());
