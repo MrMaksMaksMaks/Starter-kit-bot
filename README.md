@@ -138,8 +138,8 @@ Address returned to user, mapping stored in SQLite
 ┌────────────────────────────────────────────────────────────────────┐
 │                       Application Modules                          │
 │                                                                    │
-│   balance/   config/   db/   jupiter/   openfort/   solana/        │
-│   withdraw/                                                        │
+│   balance/   config/   crypto/   db/   jupiter/   openfort/        │
+│   solana/   withdraw/                                              │
 └───────────────┬───────────────────────┬────────────────────────────┘
                 │                       │
                 ▼                       ▼
@@ -319,6 +319,9 @@ Real integration pitfalls discovered while building this project. Documenting th
 - **Openfort's `/sign` endpoint expects the transaction's _message_ bytes.** Hash and send `transaction.message.serialize()`; sending the full serialized transaction (`bincode::serialize(&transaction)`) instead produces a signature that silently fails on-chain verification.
 - Field names for the same conceptual operation (e.g. `player` vs `user`, snake_case vs camelCase claims, hex vs base64 payload encoding) have changed between Openfort API versions, and the public docs don't always reflect this. Cross-check against the actual SDK source (`openapi-client/generated/`) when behavior looks off.
 - Creating a Jupiter Referral account through the web dashboard can register it under the wrong on-chain "project" for the Meta-Aggregator (`/order` + `/execute`) API. If a dashboard-created account gets rejected with "Invalid referralAccount" or a project mismatch error, use `@jup-ag/referral-sdk` with `projectPubKey = DkiqsTrw1u1bYFumumC7sCG2S8K25qc2vemJFHyW2wJc` (Jupiter Ultra Referral Project) instead.
+- **`OPENFORT_WALLET_SECRET` arrives as Base64-encoded DER, not PEM.** Openfort issues this secret in Base64 DER format, but the `jsonwebtoken` crate (used to sign the ES256 `X-Wallet-Auth` JWT) expects a PEM-encoded key. Decode the Base64 to raw DER bytes, then wrap them in PEM headers/footers (`-----BEGIN PRIVATE KEY-----` / `-----END PRIVATE KEY-----`) before passing to the signing library. Passing the raw Base64 string or undecoded DER directly fails silently or throws a parsing error, depending on the library version.
+- **The `0x` prefix is required going in, but absent coming back.** When sending data to Openfort's `/sign` endpoint, the hex payload must include the `0x` prefix — the server expects it. The returned signature, however, comes back as plain hex with no `0x` prefix. Handling both the same way (adding or stripping the prefix uniformly) breaks one direction or the other.
+- **The exact request body sent must byte-for-byte match what was hashed into the JWT.** Openfort's TEE checks the raw body bytes against the hash embedded in the signed JWT — not a re-serialized version of the same data. Send the same canonical string that was hashed (e.g., via `.body()` with the precomputed string), not the result of re-serializing the struct through a JSON library's own `.json()` call, which can reorder keys and silently invalidate the signature.
 
 ---
 
