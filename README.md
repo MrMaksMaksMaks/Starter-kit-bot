@@ -269,18 +269,18 @@ Then, in Telegram:
 
 ## Configuration
 
-| Variable| Required| Description|
+| Variable| Must be set?| Description|S
 | ---| ---| ---|
 | `TELEGRAM_BOT_TOKEN`| Yes| Token from @BotFather|
 | `OPENFORT_SECRET_KEY`| Yes| Openfort project secret key (`sk_...`)|
 | `OPENFORT_WALLET_SECRET`| Yes| Openfort wallet secret used to sign `X-Wallet-Auth` JWTs|
 | `OPENFORT_PUBLISHABLE_KEY`| Yes| Openfort publishable key — used for Kora gasless RPC calls|
-| `OPENFORT_BASE_URL`| No (default: `https://api.openfort.io`)| Openfort API base URL|
+| `OPENFORT_BASE_URL`| No — defaults to `https://api.openfort.io`| Openfort API base URL|
 | `SOLANA_RPC_URL`| Yes| Solana RPC endpoint. Use a devnet URL for wallet/balance testing, mainnet for swaps|
 | `SOLANA_NETWORK`| Yes| `devnet` or `mainnet` — used for explorer links and cluster context|
-| `DATABASE_URL`| No (default: `sqlite:./data/bot.db`)| SQLite connection string|
+| `DATABASE_URL`| No — defaults to `sqlite:./data/bot.db`| SQLite connection string|
 | `JUPITER_API_KEY`| No| Jupiter API key, if you have one|
-| `REFERRAL_FEE_BPS`| No (default: `50`)| Swap fee in basis points routed to your referral account|
+| `REFERRAL_FEE_BPS`| No — defaults to `50`| Swap fee in basis points routed to your referral account|
 | `REFERRAL_ACCOUNT`| No| Your Jupiter Referral account address — must be initialized under the Ultra project (see Known Integration Gotchas)|
 
 ---
