@@ -29,7 +29,7 @@ impl Config {
             bot_username: env::var("TELEGRAM_BOT_USERNAME")
                 .unwrap_or_else(|_| "@SolanaKitBot".to_string()),
             bot_description: env::var("TELEGRAM_BOT_DESCRIPTION")
-                .unwrap_or_else(|_| "Non-custodial Telegram bot for Solana".to_string()),
+                .unwrap_or_else(|_| "Solana wallet bot for Telegram".to_string()),
             openfort_base_url: env::var("OPENFORT_BASE_URL")
                 .unwrap_or_else(|_| "https://api.openfort.io".to_string()),
             openfort_secret_key: env::var("OPENFORT_SECRET_KEY")
