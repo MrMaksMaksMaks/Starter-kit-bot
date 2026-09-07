@@ -1,10 +1,10 @@
 # Solana Starter Kit Bot
 
-This is a free, open-source reference implementation designed to help developers build Telegram-native Solana applications — without building wallet, signing, swap, and gasless infrastructure from scratch.
+This is a free, open-source reference implementation designed to help developers build Telegram-native Solana applications without building wallet, signing, swap, and gasless infrastructure from scratch.
 
 ---
 
-## Project Status & Roadmap
+## Project Status and Roadmap
 
 This repository serves as **open-source public infrastructure** for the Solana developer ecosystem.
 
@@ -17,7 +17,7 @@ This repository stays deliberately narrow in scope: advanced trading features (l
 
 ## What is it?
 
-Solana Starter Kit Bot is an open-source, working Telegram bot that gives Solana developers a reusable starting point for wallet creation, transaction signing, token swaps, and sponsored (gasless) withdrawals — instead of requiring every new project to build that infrastructure from zero.
+Solana Starter Kit Bot is an open-source, working Telegram bot that gives Solana developers a reusable starting point for wallet creation, transaction signing, token swaps, and sponsored (gasless) withdrawals. This saves developers from having to build that infrastructure from zero for every new project.
 
 Building a Telegram application that talks to Solana normally means integrating wallet infrastructure, secure signing, RPC communication, swap routing, transaction sponsorship, and persistent state before a single feature idea can even be tested. This repository provides a working example of all these components that other developers can inspect and re-use in their own projects. It is built with Rust and Teloxide, using Openfort Backend Wallets for signing, Jupiter for swaps, and Kora for sponsored transactions.
 
@@ -69,11 +69,11 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 > **Architecture note:** Openfort is used as the wallet infrastructure layer in this reference implementation, treated as a **replaceable integration boundary**: the security analysis in this repository draws an explicit line between protections the provider guarantees and responsibilities that stay with the application. See [SECURITY.md](./SECURITY.md) for the full trust-boundary breakdown.
 
-Before the diagrams, a quick note on terminology — the same word ("wallet," "account") gets used loosely across this space, and it's worth being precise once:
+Before the diagrams, a quick note on terminology. The same word ("wallet," "account") gets used loosely across this space, and it's worth being precise once:
 
 | Term| Meaning|
 | ---| ---|
-| Telegram user| The application-level identity — a Telegram account interacting with the bot|
+| Telegram user| The application-level identity - a Telegram account interacting with the bot|
 | Openfort account| The wallet-infrastructure identity that owns and signs for a Solana wallet|
 | Solana wallet| The on-chain address (public key) that holds SOL / SPL tokens|
 | SQLite record| The mapping this application stores between a Telegram user and their Openfort account / Solana wallet|
@@ -231,8 +231,8 @@ Transaction signature
 
 - Rust (stable toolchain)
 - A Telegram bot token from @BotFather
-- An Openfort project — secret key, wallet secret, and publishable key
-- For swaps: a Solana mainnet RPC endpoint and a small amount of real SOL to test with (Jupiter has no devnet liquidity — see Known Integration Gotchas)
+- An Openfort project: secret key, wallet secret, and publishable key
+- For swaps: a Solana mainnet RPC endpoint and a small amount of real SOL to test with (Jupiter has no devnet liquidity - see Known Integration Gotchas)
 
 ### Installation
 
@@ -248,7 +248,7 @@ cargo build --release
 cp .env.example .env
 ```
 
-Fill in the required variables — see Configuration below for the full list.
+Fill in the required variables. See Configuration below for the full list.
 
 Do not commit your `.env` file.
 
@@ -260,9 +260,9 @@ cargo run
 
 Then, in Telegram:
 
-1. `/start` — see available commands
+1. `/start` - Show available commands list
 2. `/create_wallet` — creates a Solana wallet via Openfort
-3. `/balance` — confirms the wallet is live and readable
+3. `/balance` — confirms the wallet is live and readable, shows the SOL amount
 4. `/buy USDC 0.01` — a small real swap on mainnet, once the wallet is funded
 
 ---
@@ -289,9 +289,9 @@ Then, in Telegram:
 
 This starter kit includes an optional, **disabled-by-default** integration with Jupiter's Referral mechanism, confirmed working on mainnet (see Live mainnet proof).
 
-It exists solely as a **documented integration pattern**, showing how transparent fee routing can be added without taking custody of user funds. The repository's public-good orientation stands on its own, independent of this optional pattern.
+It exists only as a **documented integration pattern**, showing how transparent fee routing can be added without taking custody of user funds. The repository's public-good orientation stands on its own, independent of this optional pattern.
 
-Disable it entirely by omitting `REFERRAL_ACCOUNT` from `.env` — the core wallet, swap, and withdrawal infrastructure works identically with or without it.
+Disable it entirely by omitting `REFERRAL_ACCOUNT` from `.env`. The core wallet, swap, and withdrawal infrastructure works identically with or without it.
 
 The default configuration routes 50 bps (0.5%) of each swap to a referral account via Jupiter's `referralAccount` / `referralFee` parameters. Developers using this repository as a foundation can remove or replace this configuration entirely.
 
@@ -305,7 +305,7 @@ The starter kit is designed to demonstrate a safer architecture for Telegram-nat
 
 - The Telegram bot does **not** store users' private keys in SQLite or in the application source code.
 - Transaction signing is delegated to **Openfort Backend Wallet** infrastructure.
-- Each authenticated request to Openfort includes a freshly generated unique `jti`. Whether Openfort's server actually enforces uniqueness on it — and so whether this field delivers real replay protection — remains an open item under the provider trust-boundary verification (see SECURITY.md).
+- Each authenticated request to Openfort includes a freshly generated unique jti. Whether Openfort's server actually enforces uniqueness on it, and whether this field delivers real replay protection, remains an open item under the provider trust-boundary verification (see SECURITY.md).
 - The application stores the mapping between the Telegram user and the corresponding Openfort account / Solana wallet.
 
 **→ Full threat model, credential-scoping analysis, key-material export boundaries, known limitations, and planned hardening:** [`SECURITY.md`](./SECURITY.md)
@@ -316,8 +316,8 @@ The starter kit is designed to demonstrate a safer architecture for Telegram-nat
 
 Real integration pitfalls discovered while building this project. Documenting them here is meant to save the next developer the debugging time it took to find them.
 
-- Wallet creation, balance checks, and withdrawals all work fine on devnet — but `/buy` and `/sell` won't find a route there. The reason: **Jupiter has no liquidity on devnet at all.** Test swaps on mainnet with small amounts.
-- **Only `ExactIn` swap mode is supported.** The `/swap/v2/order` endpoint used here has no `ExactOut` option — amounts are always specified as how much to spend, with the received amount determined by the resulting route.
+- Wallet creation, balance checks, and withdrawals all work fine on devnet. But `/buy` and `/sell` won't find a route there. The reason: **Jupiter has no liquidity on devnet at all.** Test swaps on mainnet with small amounts.
+- **Only `ExactIn` swap mode is supported.** The `/swap/v2/order` endpoint used here has no `ExactOut` option. Amounts are always specified as how much to spend, with the received amount determined by the resulting route.
 - **Openfort's `/sign` endpoint expects the transaction's _message_ bytes.** Hash and send `transaction.message.serialize()`; sending the full serialized transaction (`bincode::serialize(&transaction)`) instead produces a signature that silently fails on-chain verification.
 - Field names for the same conceptual operation (e.g. `player` vs `user`, snake_case vs camelCase claims, hex vs base64 payload encoding) have changed between Openfort API versions, and the public docs don't always reflect this. Cross-check against the actual SDK source (`openapi-client/generated/`) when behavior looks off.
 - Creating a Jupiter Referral account through the web dashboard can register it under the wrong on-chain "project" for the Meta-Aggregator (`/order` + `/execute`) API. If a dashboard-created account gets rejected with "Invalid referralAccount" or a project mismatch error, use `@jup-ag/referral-sdk` with `projectPubKey = DkiqsTrw1u1bYFumumC7sCG2S8K25qc2vemJFHyW2wJc` (Jupiter Ultra Referral Project) instead.
@@ -339,7 +339,7 @@ The roadmap focuses on hardening the existing working implementation into a reus
 
 **→ Full deliverables, sequencing logic, and non-goals per milestone:** [`ROADMAP.md`](./Roadmap.md)
 
-Advanced trading features — limit orders, DCA, token sniping, and copy trading — are intentionally out of scope for this open-source repository. They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the proposed roadmap.
+Advanced trading features: limit orders, DCA, token sniping, and copy trading are intentionally out of scope for this open-source repository. They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the proposed roadmap.
 
 ---
 
@@ -347,7 +347,7 @@ Advanced trading features — limit orders, DCA, token sniping, and copy trading
 
 The project is released as open source so other developers can inspect the implementation, reuse it, and build on top of it.
 
-The same infrastructure can support many kinds of Telegram-native Solana applications beyond this specific bot — for example:
+The same infrastructure can support many kinds of Telegram-native Solana applications beyond this specific bot. For example:
 
 - a community bot;
 - a DeFi interface;
