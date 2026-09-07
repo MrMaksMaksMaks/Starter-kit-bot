@@ -19,7 +19,7 @@ This repository stays deliberately narrow in scope: advanced trading features (l
 
 Solana Starter Kit Bot is an open-source, working Telegram bot that gives Solana developers a reusable starting point for wallet creation, transaction signing, token swaps, and sponsored (gasless) withdrawals — instead of requiring every new project to build that infrastructure from zero.
 
-Building a Telegram application that talks to Solana normally means integrating wallet infrastructure, secure signing, RPC communication, swap routing, transaction sponsorship, and persistent state before a single feature idea can even be tested. This repository provides a working example of all these components that other developers can re-use in their own projects. It is built with Rust and Teloxide, using Openfort Backend Wallets for signing, Jupiter for swaps, and Kora for sponsored transactions.
+Building a Telegram application that talks to Solana normally means integrating wallet infrastructure, secure signing, RPC communication, swap routing, transaction sponsorship, and persistent state before a single feature idea can even be tested. This repository provides a working example of all these components that other developers can inspect and re-use in their own projects. It is built with Rust and Teloxide, using Openfort Backend Wallets for signing, Jupiter for swaps, and Kora for sponsored transactions.
 
 Solana fits this use case specifically because interactions are cheap and fast enough for a conversational, frequent-action UX, Jupiter's liquidity is deep enough that swaps don't need custom routing, and Kora's sponsorship infrastructure lets transaction fees be abstracted away from the end user for supported flows.
 
@@ -134,7 +134,7 @@ Address returned to user, mapping stored in SQLite
 │                  Rust / Teloxide Application                       │
 │                                                                    │
 │  /start  /create_wallet  /balance  /tokens  /buy  /sell  /withdraw │
-└─────────────────────────────┬────────────────────────────────────┘
+└─────────────────────────────┬──────────────────────────────────────┘
                               │
                               ▼
 ┌────────────────────────────────────────────────────────────────────┐
@@ -145,12 +145,12 @@ Address returned to user, mapping stored in SQLite
 └───────────────┬───────────────────────┬────────────────────────────┘
                 │                       │
                 ▼                       ▼
-┌─────────────────────────┐   ┌───────────────────────────────────┐
-│        SQLite           │   │       External Infrastructure     │
-│                         │   │                                   │
-│ User ↔ Wallet mapping   │   │ Openfort Backend Wallets          │
-│ Application state       │   │ Jupiter API                       │
-└─────────────────────────┘   │ Kora                              │
+┌─────────────────────────┐    ┌───────────────────────────────────┐
+│        SQLite           │    │       External Infrastructure     │
+│                         │    │                                   │
+│ User ↔ Wallet mapping   │    │ Openfort Backend Wallets          │
+│ Application state       │    │ Jupiter API                       │
+└─────────────────────────┘    │ Kora                              │
                                │ Solana RPC                        │
                                └───────────────────────────────────┘
 ```
@@ -336,6 +336,8 @@ The roadmap focuses on hardening the existing working implementation into a reus
 | M4 | Infrastructure hardening (RPC failover, least-privilege credentials, key-share export verification) | Planned |
 | M5 | Testing, developer experience & reproducibility | Planned |
 | M6 | Documentation, secret rotation, provider abstraction boundary, production deployment guide | Planned |
+
+**→ Full deliverables, sequencing logic, and non-goals per milestone:** [`ROADMAP.md`](./Roadmap.md)
 
 Advanced trading features — limit orders, DCA, token sniping, and copy trading — are intentionally out of scope for this open-source repository. They may be developed separately as a commercial product built on top of this open-source foundation and are not part of the proposed roadmap.
 
