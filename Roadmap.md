@@ -20,6 +20,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Rate limiting for sensitive bot commands, with stronger limits on withdrawal and transaction-related operations.
 - Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which is already mitigated today via per-request JWT nonces - this closes the separate gap at the transaction-submission level.)
 - Transaction history for supported wallet operations: withdrawals, swaps, signatures, timestamps, status.
+- Reconciliation of in-flight transactions against on-chain state on startup — resolving any records left in a pending status by an unexpected shutdown (crash, power loss, or planned restart), not just by an explicit shutdown procedure.
 - Structured transaction and security logging.
 - Initial security baseline and threat-model documentation.
 - Automated tests for critical withdrawal and wallet flows.
@@ -33,11 +34,11 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 
 **Goal:** Make the Telegram-identity-to-wallet association recoverable while minimizing the risk of unauthorized account takeover.
 
-**This is account recovery, not key recovery.** The mechanism restores the association between a Telegram identity and an existing Openfort account. It never touches, reconstructs, or gains access to the wallet's private signing key, which remains inside Openfort's infrastructure throughout. This protects against Telegram-identity takeover — it does not, and cannot, protect against a compromise of the backend's own signing authorization (addressed separately in M4).
+**This is account recovery, not key recovery.** The mechanism restores the association between a Telegram identity and an existing Openfort account. It never touches, reconstructs, or gains access to the wallet's private signing key, which remains inside Openfort's infrastructure throughout. This protects against Telegram-identity takeover. It does not, and cannot, protect against a compromise of the backend's own signing authorization (addressed separately in M4).
 
 **Deliverables**
 - TOTP-based recovery factor, generated and confirmed once at wallet creation (QR code sent once; the bot deletes the message shortly after setup is confirmed).
-- High-entropy, single-use backup codes, generated at the same time, shown once, stored only as hashes — a documented fallback if the authenticator device is lost, not a substitute for TOTP.
+- High-entropy, single-use backup codes, generated at the same time, shown once and stored only as hashes. It's a documented fallback if the authenticator device is lost, not a substitute for TOTP.
 - Recovery initiated from a new Telegram identity by supplying a recovery identifier plus a valid TOTP code or an unused backup code.
 - A recovery cooldown period before the new Telegram identity is bound, giving the legitimate owner a window to notice and cancel an unauthorized attempt.
 - Notification to the original Telegram identity, if still reachable, with an explicit cancel action — best-effort, since delivery can fail, but requires no "change detection" to implement.
@@ -56,7 +57,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 ## M3: Independent Security Review and Remediation
 **Month 3 (target)**
 
-**Goal:** Obtain independent, external security scrutiny of the highest-risk code — wallet association, signing, withdrawal, and recovery — completed in M1 and M2, before further feature work builds on top of it.
+**Goal:** Provide independent, external security verification of the highest-risk code — wallet association, signing, withdrawal, and recovery — completed in M1 and M2, before further feature work builds on top of it.
 
 **Deliverables**
 - External security review covering: wallet/account association, transaction construction, transaction signing flow, withdrawal flow, authentication/authorization boundaries, the recovery flow, and sensitive configuration/secret handling.
@@ -66,7 +67,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Regression / re-testing after remediation.
 - Public documentation of relevant findings and implemented fixes, where disclosure is appropriate.
 
-**Why this is scoped to happen right after M1–M2, not at the end of the project:** the review's scope is deliberately limited to the wallet, signing, withdrawal, and recovery code completed in M1–M2. Infrastructure hardening (M4) and testing/developer-experience work (M5) do not modify this reviewed surface, so reviewing immediately after the highest-risk code is complete — rather than waiting until the end — allows critical findings to be fixed with the rest of the roadmap still ahead, instead of being discovered at the very end with no room left to address them.
+**Why this is scoped to happen right after M1–M2, not at the end of the project:** the review's scope is deliberately limited to the wallet, signing, withdrawal, and recovery code completed in M1–M2. Infrastructure hardening (M4) and testing/developer-experience work (M5) do not modify this reviewed surface, so reviewing immediately after the highest-risk code is complete - rather than waiting until the end — allows critical findings to be fixed with the rest of the roadmap still ahead, instead of being discovered at the very end with no room left to address them.
 
 **Contingency:** If reviewer availability or scope constraints require it, review priority goes to the highest-risk flows first — signing, withdrawal, and recovery — with any remaining scope addressed as a documented follow-up rather than silently dropped.
 
@@ -86,7 +87,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Structured operational logs for transactions and security-relevant events.
 - Documentation covering production-oriented operational configuration.
 
-*Least-privilege & Openfort security hardening:*
+*Least-privilege and Openfort security hardening:*
 - Credential isolation for Openfort policy management, using separate least-privilege API credentials:
   - **Key A — Bot runtime:** signing and routine account operations; no `policies:write/delete`, no `accounts:export`, no `private_key_shares:export`.
   - **Key B — Policy provisioning:** `policies:read/write` only, no `accounts:sign`. Never accepts arbitrary policy JSON — limited to a fixed, non-user-controlled workflow of predefined policy profiles.
@@ -96,8 +97,8 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Verification of whether a Key-B-scoped credential can attach a new, more permissive policy to a wallet that already has one, and how Openfort resolves multiple project-level and account-level policies on the same account.
 - Restrict production API-key access by IP where supported.
 - Keep Openfort credentials outside source control at every stage, including CI/CD and deployment tooling.
-- Monitor signing requests and policy changes; detect abnormal signing activity — sudden increases in signing-request volume, transactions to previously-unseen destinations, unusual transaction frequency or value.
-- Explicit, public documentation of the verified trust boundaries of this credential model — including any case where scope separation doesn't hold as expected.
+- Monitor signing requests and policy changes; detect abnormal signing activity - sudden increases in signing-request volume, transactions to previously-unseen destinations, unusual transaction frequency or value.
+- Explicit, public documentation of the verified trust boundaries of this credential model - including any case where scope separation doesn't hold as expected.
 
 *Key-material export verification:*
 - Verify whether the `private_key_shares:export` permission applies to Solana backend wallets, and what material the export operation actually returns.
@@ -105,9 +106,9 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Confirm that production runtime credentials can be provisioned without this capability.
 - Document how key-share export capability affects the threat model under backend or credential compromise.
 
-**Non-goals for this milestone:** A fully separate, network-isolated policy-management service (its own deployment, monitoring, and authenticated internal API) is a stronger but materially more expensive version of the credential-isolation control above. It's documented as a possible future extension, not delivered here — the work above closes most of the practical risk (via a fixed internal function unreachable by arbitrary user input) without the added operational surface of a second service. Likewise, Openfort's on-chain, contract-enforced permissions are currently documented for EVM/ERC-4337 smart accounts, not confirmed available for Solana backend wallets, and are noted as a possible future direction rather than promised here. Administrative alerting infrastructure and metrics dashboards are also excluded — structured logs and backups are delivered, but real-time alerting/visualization tooling is documented as a production recommendation rather than implemented here.
+**Non-goals for this milestone:** A fully separate, network-isolated policy-management service (its own deployment, monitoring, and authenticated internal API) is a stronger but materially more expensive version of the credential-isolation control above. It's documented as a possible future extension, not delivered here — the work above closes most of the practical risk (via a fixed internal function unreachable by arbitrary user input) without the added operational surface of a second service. Likewise, Openfort's on-chain, contract-enforced permissions are currently documented for EVM/ERC-4337 smart accounts, not confirmed available for Solana backend wallets, and are noted as a possible future direction rather than promised here. Administrative alerting infrastructure and metrics dashboards are also excluded - structured logs and backups are delivered, but real-time alerting/visualization tooling is documented as a production recommendation rather than implemented here.
 
-**Expected outcome:** A more resilient reference deployment, and a credential model whose actual boundaries — not just intended ones — have been verified against the live Openfort API rather than assumed from documentation.
+**Expected outcome:** A more resilient reference deployment, and a credential model whose actual boundaries - not just intended ones — have been verified against the live Openfort API rather than assumed from documentation.
 
 ---
 
@@ -130,7 +131,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 **Month 6**
 
 **Deliverables**
-- Wallet secret rotation policy (e.g., every 90 days), leveraging Openfort's built-in secret-rotation endpoint.
+- Wallet secret rotation policy (e.g., every 90 days), leveraging Openfort's built-in secret-rotation endpoint. Applying a rotated secret requires a bot restart — the rotation procedure documents this explicitly, executed as a graceful shutdown (stop accepting new commands, let in-flight operations finish, then restart) rather than an abrupt process kill, with a user-facing notice during the window.
 - Reference integration with a platform secret manager (e.g., AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault) for production secret storage, in place of plain environment variables.
 - **Wallet provider abstraction boundary:** the existing Openfort integration is structured behind a clear internal boundary, isolating provider-specific code from application-level security logic (authZ, recovery, transaction policy, monitoring). Which parts of the integration are Openfort-specific (API version quirks, payload encoding, message-vs-full-tx signing, credential scoping) versus generic to any backend-wallet provider is explicitly documented. This is documentation and code organization, not a commitment to integrate additional providers.
 - Complete architecture documentation.
@@ -142,13 +143,13 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Final review confirming documented functionality matches the actual implementation.
 - Public release of the completed milestone set under the existing MIT license.
 
-**Expected outcome:** A documented, reproducible open-source reference implementation — with a defined operational-security posture, not just application code — that developers can fork and adapt for Telegram-native Solana applications.
+**Expected outcome:** A documented, reproducible open-source reference implementation - with a defined operational-security posture, not just application code — that developers can fork and adapt for Telegram-native Solana applications.
 
 ---
 
 ## Out of scope
 
-Advanced trading features — limit orders, DCA, token sniping, copy trading — are intentionally out of scope for this open-source repository. They carry meaningfully higher security, execution-reliability, and abuse-prevention requirements than the core wallet / swap / withdraw flows this repository demonstrates, and may be developed separately, outside this roadmap.
+Advanced trading features: limit orders, DCA, token sniping and copy trading are intentionally out of scope for this open-source repository. They carry meaningfully higher security, execution-reliability, and abuse-prevention requirements than the core wallet / swap / withdraw flows this repository demonstrates, and may be developed separately, outside this roadmap.
 
 Full architecture and trust-boundary documentation for what's already built: [`SECURITY.md`](./SECURITY.md).
 
