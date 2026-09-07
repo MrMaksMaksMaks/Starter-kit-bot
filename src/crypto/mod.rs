@@ -32,13 +32,21 @@ mod tests {
 
     #[test]
     fn test_conversion() {
-        let test_key = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgPfFX/JvA/EmXkxBgDqccfN7F3A7DM4thhwpUhrFt/6ShRANCAAQhxthEiGdGJeZGoGawAkg4XpvbRdm/BOzlE5We0L6Yj+wUVCJ/cvim6UGW+01zyBfOUITgEV7rKhdOlwv2Olgg";
-        
-        println!("📝 Key length: {}", test_key.len());
+        // Not a cryptographic key — arbitrary bytes used only to verify that
+        // der_base64_to_pem correctly base64-decodes its input and wraps the
+        // result in PEM armor. Cryptographic validity of a real key is
+        // exercised separately, at actual use time, via
+        // EncodingKey::from_ec_pem in openfort/mod.rs — not here. Deliberately
+        // NOT a key-shaped value, so it can never be mistaken for (or
+        // flagged by secret scanners as) real key material.
+        let dummy_bytes = b"not-a-real-key-just-arbitrary-test-bytes-for-pem-wrapping";
+        let test_key = STANDARD.encode(dummy_bytes);
+
+        println!("📝 Test input length: {}", test_key.len());
         println!("📝 First 30 characters: {}", &test_key[..30]);
-        
-        let result = der_base64_to_pem(test_key, "PRIVATE KEY");
-        
+
+        let result = der_base64_to_pem(&test_key, "PRIVATE KEY");
+
         match result {
             Ok(pem) => {
                 println!("✅ Conversion successful!");
@@ -49,7 +57,7 @@ mod tests {
             }
             Err(e) => {
                 println!("❌ Conversion error: {}", e);
-                panic!("Conversion failed");
+                panic!("Conversion failed: {}", e);
             }
         }
     }
