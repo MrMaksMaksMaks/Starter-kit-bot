@@ -45,20 +45,24 @@ async fn resolve_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
     solana::get_token_decimals(rpc_url, mint).await
 }
 
-/// Maps SOLANA_NETWORK ("mainnet" / "devnet") to the literal cluster name
-/// Openfort/Kora expects on the `/rpc/solana/{cluster}` path.
+/// Normalizes the configured Solana cluster name before it reaches Kora or
+/// the Explorer link.
 ///
 /// Confirmed against Openfort's own docs (gas-sponsorship, gas-spl): every
 /// working example uses either `/rpc/solana/devnet` or
 /// `/rpc/solana/mainnet-beta` — there is no `/rpc/solana/mainnet`. Solana
 /// Explorer's `?cluster=` parameter expects the same two values, so this
 /// mapping is reused for the Explorer link built later in `main()` as well.
-/// Kept as a small mapping (rather than renaming SOLANA_NETWORK itself) so
-/// ".env" can keep using the more familiar "mainnet"/"devnet" values.
+///
+/// README documents `SOLANA_NETWORK` as `devnet` / `mainnet-beta` — the
+/// canonical values Kora/Explorer actually expect, so under a correctly
+/// configured `.env` this function is a no-op passthrough. The
+/// `"mainnet" => "mainnet-beta"` arm is kept only as a lenient fallback for
+/// anyone who still types the shorter "mainnet".
 fn kora_cluster(network: &str) -> &str {
     match network {
         "mainnet" => "mainnet-beta",
-        other => other, // "devnet" passes through unchanged
+        other => other, // "devnet" and "mainnet-beta" pass through unchanged
     }
 }
 
