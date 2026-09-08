@@ -27,17 +27,17 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 | Feature| Status|
 | ---| ---|
-| Telegram bot (basic frontend)| ✅|
+| Telegram bot (basic frontend)| ✅ network-agnostic — same address on both clusters|
 | Openfort Backend Wallet creation| ✅ Mainet|
 | SOL balance check| ✅ Mainnet|
 | SPL / Token-2022 balances| ✅ Mainnet|
 | Jupiter swaps (buy/sell)| ✅ Mainnet|
-| Kora sponsored (gasless) withdrawals| ✅Devnet|
+| Kora sponsored (gasless) withdrawals| ✅ Devnet|
 | Jupiter Referral (optional, disabled by default)| ✅ Mainnet|
 
 > For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
 
-> **Note:** Mainnet testing confirms that all core features work with real funds and live Solana infrastructure. Devnet is used for wallet creation and balance checks where applicable.
+> **Note:** Mainnet testing confirms that all core features work with real funds and live Solana infrastructure. Wallet creation is not network-specific. Openfort provide a single Solana keypair/address that is simultaneously valid on devnet and mainnet-beta, since Solana addresses aren't per-cluster only account state is. Balance checks, swaps, and withdrawals, by contrast, genuinely run against whichever cluster is configured — mainnet testing confirms those work with real funds and live infrastructure.
 
 ---
 
@@ -327,7 +327,7 @@ Real integration pitfalls discovered while building this project. Documenting th
 - **`OPENFORT_WALLET_SECRET` arrives as Base64-encoded DER, not PEM.** Openfort issues this secret in Base64 DER format, but the `jsonwebtoken` crate (used to sign the ES256 `X-Wallet-Auth` JWT) expects a PEM-encoded key. Decode the Base64 to raw DER bytes, then wrap them in PEM headers/footers (`-----BEGIN PRIVATE KEY-----` / `-----END PRIVATE KEY-----`) before passing to the signing library. Passing the raw Base64 string or undecoded DER directly fails silently or throws a parsing error, depending on the library version.
 - **The `0x` prefix is required going in, but absent coming back.** When sending data to Openfort's `/sign` endpoint, the hex payload must include the `0x` prefix — the server expects it. The returned signature, however, comes back as plain hex with no `0x` prefix. Handling both the same way (adding or stripping the prefix uniformly) breaks one direction or the other.
 - **The exact request body sent must byte-for-byte match what was hashed into the JWT.** Openfort's TEE checks the raw body bytes against the hash embedded in the signed JWT — not a re-serialized version of the same data. Send the same canonical string that was hashed (e.g., via `.body()` with the precomputed string), not the result of re-serializing the struct through a JSON library's own `.json()` call, which can reorder keys and silently invalidate the signature.
-- Kora's /rpc/solana/{cluster} path expects mainnet-beta, not mainnet. Confirmed against Openfort's own docs (gas-sponsorship, gas-spl): every working example uses /rpc/solana/devnet or /rpc/solana/mainnet-beta. SOLANA_NETWORK in .env stays mainnet/devnet for readability; a small kora_cluster() mapping in main.rs converts it before it reaches Kora — and before it's used to build the Explorer ?cluster= link, which expects the same two values.
+- Kora's /rpc/solana/{cluster} path expects mainnet-beta, not mainnet. Confirmed against Openfort's own docs (gas-sponsorship, gas-spl): every working example uses /rpc/solana/devnet or /rpc/solana/mainnet-beta. SOLANA_NETWORK in .env stays mainnet-beta/devnet for readability; a small kora_cluster() mapping in main.rs converts it before it reaches Kora — and before it's used to build the Explorer ?cluster= link, which expects the same two values.
 
 ---
 
