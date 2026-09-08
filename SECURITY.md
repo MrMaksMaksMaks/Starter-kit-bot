@@ -4,7 +4,7 @@ Security is a core design consideration of this project and an area of active, o
 
 This repository is, at its core, a reference architecture for a specific and under-documented class of problem: what happens when a messaging application's identity — a Telegram account — becomes the primary user interface and authorization entry point to a managed, backend-controlled Solana wallet. That framing is the actual contribution this project makes to the Solana developer ecosystem — the interesting engineering problem here is the identity/authorization boundary itself, ahead of the trading-bot UI wrapped around it.
 
-> **Scope:** This document describes the security model, known limitations, and planned hardening of the Solana Starter Kit Bot. It is a living document that will be updated as the [proposed roadmap](../README.md#roadmap) progresses.
+> **Scope:** This document describes the security model, known limitations, and planned hardening of the Solana Starter Kit Bot. It is a living document that will be updated as the [proposed roadmap](./README.md#roadmap) progresses.
 
 ---
 
