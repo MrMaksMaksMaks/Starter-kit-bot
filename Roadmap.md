@@ -18,7 +18,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Configurable withdrawal limits, with clear user feedback when a limit is exceeded.
 - Solana address validation before transaction construction; malformed or invalid destinations are rejected before signing.
 - Rate limiting for sensitive bot commands, with stronger limits on withdrawal and transaction-related operations.
-- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which is already mitigated today via per-request JWT nonces - this closes the separate gap at the transaction-submission level.)
+- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which relies on a per-request JWT nonce (jti) whose actual server-side enforcement is unverified - see M4. This deliverable closes the separate, confirmed gap at the transaction-submission level.)
 - Transaction history for supported wallet operations: withdrawals, swaps, signatures, timestamps, status.
 - Reconciliation of in-flight transactions against on-chain state on startup — resolving any records left in a pending status by an unexpected shutdown (crash, power loss, or planned restart), not just by an explicit shutdown procedure.
 - Structured transaction and security logging.
