@@ -37,11 +37,11 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 > For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
 
-> **Note:** Wallet creation is not network-specific. Openfort provides a single Solana keypair/address that is simultaneously valid on devnet and mainnet-beta. since Solana addresses aren't per-cluster (only account state is). Balance checks, swaps, and withdrawals, by contrast, genuinely run against whichever cluster is configured. Mainnet testing confirms those work with real funds and live infrastructure.
+> **Note:** Wallet creation is not network-specific. Openfort provides a single Solana keypair/address that is simultaneously valid on devnet and mainnet-beta, since Solana addresses aren't per-cluster (only account state is). Balance checks, swaps, and withdrawals, by contrast, genuinely run against whichever cluster is configured. Mainnet testing confirms those work with real funds and live infrastructure.
 
 ---
 
-## Live mainnet proof
+## Live mainnet proofS
 
 | Flow| Signature| Explorer|
 | ---| ---| ---|
