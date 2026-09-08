@@ -30,12 +30,14 @@ fn format_balances(sol_balance: f64, tokens: &[TokenBalance]) -> String {
     } else {
         output.push_str("📊 *Tokens:*\n");
         for token in tokens {
-            // symbol_for_mint may return an arbitrary, attacker-controlled
-            // string — SPL token metadata is untrusted input, and spam/scam
-            // tokens routinely contain MarkdownV2 special characters.
-            // Escaping it here is the actual fix: previously this was
-            // inserted raw, and a single problematic symbol would make
-            // Telegram reject the entire /tokens message (MarkdownV2 fails
+            // symbol_for_mint never reads on-chain token metadata — for anything
+            // outside the five hardcoded symbols it falls back to a truncated
+            // "XXXX...YYYY" form of the mint address itself. Base58 mint
+            // addresses can't contain MarkdownV2 special characters, but that
+            // "..." fallback format always inserts three literal periods, which
+            // MarkdownV2 does require escaping. Escaping here is the actual fix:
+            // previously this was inserted raw, and Telegram rejects the entire
+            // /tokens message over a single unescaped period (MarkdownV2 fails
             // the whole message, not just the offending line).
             let symbol = escape_markdown_v2(&symbol_for_mint(&token.mint));
             let amount_str = format!("{:.6}", token.ui_amount).replace('.', "\\.");
@@ -50,13 +52,37 @@ fn format_balances(sol_balance: f64, tokens: &[TokenBalance]) -> String {
 mod tests {
     use super::*;
 
-    // Regression test for the missing-escaping bug: a token symbol containing
-    // MarkdownV2 special characters must not appear raw in the output.
-    #[tokio::test]
-    async fn scam_token_symbol_does_not_break_markdown() {
-        let result = get_formatted_balances("http://fake-rpc-for-test", "fake-address")
-            .await
-            .unwrap();
-        assert!(!result.contains("SCAM.rug-2000!"));
+    // Regression test for the missing-escaping bug.
+    //
+    // format_balances is the pure, network-free function that actually contains
+    // the escaping logic — test it directly instead of going through
+    // get_formatted_balances, which makes a real RPC call and can't be exercised
+    // with a fake URL (that previously made this test either panic on a network
+    // error or never reach the assertion it was meant to check).
+    //
+    // symbol_for_mint never returns free-form, attacker-controlled text: for any
+    // mint outside the five hardcoded symbols (SOL/USDC/USDT/wBTC/wETH) it falls
+    // back to a truncated "XXXX...YYYY" form of the mint address itself. Base58
+    // mint addresses can't contain MarkdownV2 special characters — but the "..."
+    // separator the function inserts is three literal periods, which MarkdownV2
+    // does require escaping. That's the real, reachable case this test guards,
+    // rather than a hypothetical scam-symbol string that symbol_for_mint could
+    // never actually produce.
+    #[test]
+    fn unknown_mint_symbol_is_escaped() {
+        let tokens = vec![TokenBalance {
+            mint: "ScamMint1111111111111111111111111111111111".to_string(),
+            amount_raw: "1000000".to_string(),
+            decimals: 6,
+            ui_amount: 1.0,
+        }];
+
+        let result = format_balances(0.5, &tokens);
+
+        // symbol_for_mint renders this as "Scam...1111" — the raw, unescaped
+        // form must not appear in the output.
+        assert!(!result.contains("Scam...1111"));
+        // The escaped form (a backslash before each literal period) must.
+        assert!(result.contains("Scam\\.\\.\\.1111"));
     }
 }
