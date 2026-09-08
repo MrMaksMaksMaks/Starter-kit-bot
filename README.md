@@ -28,11 +28,11 @@ Solana fits this use case specifically because interactions are cheap and fast e
 | Feature| Status|
 | ---| ---|
 | Telegram bot (basic frontend)| ✅|
-| Openfort Backend Wallet creation| ✅|
+| Openfort Backend Wallet creation| ✅ Mainet|
 | SOL balance check| ✅ Mainnet|
 | SPL / Token-2022 balances| ✅ Mainnet|
 | Jupiter swaps (buy/sell)| ✅ Mainnet|
-| Kora sponsored (gasless) withdrawals| ✅|
+| Kora sponsored (gasless) withdrawals| ✅Devnet|
 | Jupiter Referral (optional, disabled by default)| ✅ Mainnet|
 
 > For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
@@ -280,7 +280,7 @@ Then, in Telegram:
 | `OPENFORT_PUBLISHABLE_KEY`| Yes| Openfort publishable key — used for Kora gasless RPC calls|
 | `OPENFORT_BASE_URL`| No — defaults to `https://api.openfort.io`| Openfort API base URL|
 | `SOLANA_RPC_URL`| Yes| Solana RPC endpoint. Use a devnet URL for wallet/balance testing, mainnet for swaps|
-| `SOLANA_NETWORK`| Yes| `devnet` or `mainnet` — used for explorer links and cluster context|
+| `SOLANA_NETWORK`| Yes| `devnet` or `mainnet-beta` — used for explorer links and cluster context|
 | `DATABASE_URL`| No — defaults to `sqlite:./data/bot.db`| SQLite connection string|
 | `JUPITER_API_KEY`| No| Jupiter API key, if you have one|
 | `REFERRAL_FEE_BPS`| No — defaults to `50`| Swap fee in basis points routed to your referral account|

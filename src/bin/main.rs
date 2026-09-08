@@ -45,6 +45,23 @@ async fn resolve_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
     solana::get_token_decimals(rpc_url, mint).await
 }
 
+/// Maps SOLANA_NETWORK ("mainnet" / "devnet") to the literal cluster name
+/// Openfort/Kora expects on the `/rpc/solana/{cluster}` path.
+///
+/// Confirmed against Openfort's own docs (gas-sponsorship, gas-spl): every
+/// working example uses either `/rpc/solana/devnet` or
+/// `/rpc/solana/mainnet-beta` — there is no `/rpc/solana/mainnet`. Solana
+/// Explorer's `?cluster=` parameter expects the same two values, so this
+/// mapping is reused for the Explorer link built later in `main()` as well.
+/// Kept as a small mapping (rather than renaming SOLANA_NETWORK itself) so
+/// ".env" can keep using the more familiar "mainnet"/"devnet" values.
+fn kora_cluster(network: &str) -> &str {
+    match network {
+        "mainnet" => "mainnet-beta",
+        other => other, // "devnet" passes through unchanged
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let subscriber = FmtSubscriber::builder()
@@ -487,7 +504,7 @@ async fn main() -> Result<()> {
                                     &user.solana_address,
                                     to_address,
                                     amount_lamports,
-                                    "devnet",
+                                    kora_cluster(&config.solana_network),
                                 ).await {
                                     Ok(txid) => {
                                         println!("✅ Withdraw successful! TXID: {}", txid);
@@ -497,7 +514,7 @@ async fn main() -> Result<()> {
                                                 "✅ Withdraw sent\\!\n\nTXID: `{}`\n\n[View on Explorer](https://explorer.solana.com/tx/{}?cluster={})",
                                                 txid,
                                                 txid,
-                                                config.solana_network
+                                                kora_cluster(&config.solana_network)
                                             )
                                         ).parse_mode(teloxide::types::ParseMode::MarkdownV2).await?;
                                     }
