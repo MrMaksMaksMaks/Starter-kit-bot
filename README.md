@@ -28,11 +28,11 @@ Solana fits this use case specifically because interactions are cheap and fast e
 | Feature| Status|
 | ---| ---|
 | Telegram bot (basic frontend)| ✅ |
-| Openfort Backend Wallet creation| ✅ network-agnostic — same address on both clusters|
+| Openfort Backend Wallet creation| ✅ network-agnostic - same address on both clusters|
 | SOL balance check| ✅ Mainnet|
 | SPL / Token-2022 balances| ✅ Mainnet|
 | Jupiter swaps (buy/sell)| ✅ Mainnet|
-| Kora sponsored (gasless) withdrawals| ✅ Devnet|
+| Kora sponsored (gasless) withdrawals (SOL + SPL tokens)| ✅ Devnet|
 | Jupiter Referral (optional, disabled by default)| ✅ Mainnet|
 
 > For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
@@ -53,6 +53,8 @@ Solana fits this use case specifically because interactions are cheap and fast e
 | Flow| Signature| Explorer|
 | ---| ---| ---|
 | Sponsored withdrawal (via Kora)| `27PAXPkFoD97ZBcVemXN3o3B1eMAsdJkmmgFUe9dKGYjE8PkwgNK4JQJNt2HCGMmmMTsoQiHSETUwuJD98yC9x87`| [View](https://explorer.solana.com/tx/27PAXPkFoD97ZBcVemXN3o3B1eMAsdJkmmgFUe9dKGYjE8PkwgNK4JQJNt2HCGMmmMTsoQiHSETUwuJD98yC9x87)|
+
+*The SOL row above is a self-transfer (`from` == `to`) — used to generate a verifiable signature without funding a second wallet; the transferred amount returns to the same address, while the fee itself is paid by the Fee Payer account shown in the transaction, confirming gasless sponsorship. The SPL row moves real balance between two distinct wallets, with both the debit and credit visible in the transaction's Tokens tab.*
 
 ---
 
@@ -328,7 +330,7 @@ Real integration pitfalls discovered while building this project. Documenting th
 - **The `0x` prefix is required going in, but absent coming back.** When sending data to Openfort's `/sign` endpoint, the hex payload must include the `0x` prefix — the server expects it. The returned signature, however, comes back as plain hex with no `0x` prefix. Handling both the same way (adding or stripping the prefix uniformly) breaks one direction or the other.
 - **The exact request body sent must byte-for-byte match what was hashed into the JWT.** Openfort's TEE checks the raw body bytes against the hash embedded in the signed JWT — not a re-serialized version of the same data. Send the same canonical string that was hashed (e.g., via `.body()` with the precomputed string), not the result of re-serializing the struct through a JSON library's own `.json()` call, which can reorder keys and silently invalidate the signature.
 - Kora's /rpc/solana/{cluster} path expects mainnet-beta, not mainnet. Confirmed against Openfort's own docs (gas-sponsorship, gas-spl): every working example uses /rpc/solana/devnet or /rpc/solana/mainnet-beta. SOLANA_NETWORK in .env stays mainnet-beta/devnet for readability; a small kora_cluster() mapping in main.rs converts it before it reaches Kora — and before it's used to build the Explorer ?cluster= link, which expects the same two values.
-
+- **Token symbol shorthand (`USDC`, `USDT`, etc.) only resolves on mainnet.** `resolve_token_mint`/`symbol_for_mint` check against a hardcoded table of mainnet mint addresses. On devnet, a symbol like `USDC` won't match anything and gets treated as a literal (invalid) mint address instead. Pass the raw devnet mint address directly (e.g. Circle's devnet USDC, `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`) when testing `/buy`, `/sell`, or `/withdraw` on devnet — the rest of the pipeline (balance lookup, decimals, token program resolution) reads everything from RPC and is mint-agnostic; only the symbol shorthand is mainnet-only.
 ---
 
 ## Roadmap

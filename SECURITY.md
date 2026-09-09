@@ -176,6 +176,9 @@ This repository is a working starter kit, not a fully hardened production system
 - Transactions are not simulated before signing.
 - There is no recovery path if a user's Telegram identity changes or is lost.
 - Secrets are currently provided via environment variables only; integration with a dedicated secret manager (e.g. AWS Secrets Manager, Google Secret Manager, HashiCorp Vault) for production deployments is not yet implemented.
+- SPL token withdrawals require the recipient's Associated Token Account (ATA) to already exist for that mint. The recipient ATA is not auto-created — doing so would mean someone (the project, via Kora, or the user) pays the one-time account-rent cost, and this project has not yet decided who that should be. A withdrawal to a recipient without an existing ATA fails with a clear error rather than silently creating one.
+- SPL token withdrawals are not verified against Token-2022 mints that use extensions affecting transfer amounts (e.g. transfer fees, transfer hooks). `transfer_checked` does not account for those; only the legacy SPL Token program and plain Token-2022 mints (no amount-affecting extensions) are supported.
+- Token symbol shorthand (`USDC`, `USDT`, etc., used by `/buy`, `/sell`, and `/withdraw`) resolves against a hardcoded table of **mainnet** mint addresses only. On devnet, these symbols do not resolve — the raw devnet mint address must be passed directly. Balance lookups, decimals, and token-program resolution are otherwise mint-agnostic and RPC-driven.
 
 These limitations are intentionally documented so developers can clearly understand what the reference implementation does today and what still needs to be hardened before exposing it to real users with meaningful funds.
 
