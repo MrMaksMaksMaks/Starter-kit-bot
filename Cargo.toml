@@ -43,6 +43,8 @@ hex = "0.4"
 solana-client = "1.18"
 solana-sdk = "1.18"
 solana-program = "1.18"
+spl-token = "4.0"
+spl-associated-token-account = "3.0"
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -74,4 +76,4 @@ rev = "6105d7a5591aefa646a95d12b5e8d3f55a9214ef"
 # Picked up transitively by: solana-client, solana-sdk, solana-program,
 # spl-token, spl-associated-token-account.
 git = "https://github.com/solana-labs/curve25519-dalek.git"
-rev = "c14774464c4d38de553c6ef2f48a10982c1b4801"
+rev = "0382b672560493840f453f2a0e24c4a129abd3a4"

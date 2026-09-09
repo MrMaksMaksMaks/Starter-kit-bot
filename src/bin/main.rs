@@ -128,9 +128,11 @@ async fn main() -> Result<()> {
                     /tokens - Show all SPL token balances\n\
                     /buy <token> <SOL> - Spend SOL to buy a token\n\
                     /sell <token> <amount> - Sell a token for SOL\n\
-                    /withdraw <amount> <address> - Withdraw SOL\n\n\
+                    /withdraw <token> <amount> <address> - Withdraw SOL or a token\n\n\
                     Example: /buy USDC 0.1 — spends 0.1 SOL to buy USDC\n\
-                    Example: /sell USDC 5 — sells 5 USDC for SOL"
+                    Example: /sell USDC 5 — sells 5 USDC for SOL\n\
+                    Example: /withdraw SOL 0.1 <address> — withdraws 0.1 SOL\n\
+                    Example: /withdraw USDC 5 <address> — withdraws 5 USDC"
                 ).await?;
                 return Ok(());
             }
@@ -441,22 +443,23 @@ async fn main() -> Result<()> {
             }
 
             // ============================
-            // /withdraw
+            // /withdraw <token> <amount> <address>
             // ============================
             if text.starts_with("/withdraw") {
                 println!("💸 Processing withdraw for user: {}", telegram_id);
 
                 let parts: Vec<&str> = text.split_whitespace().collect();
-                if parts.len() < 3 {
+                if parts.len() < 4 {
                     bot.send_message(
                         chat_id,
-                        "❌ Please specify amount and address.\n\nExample: /withdraw 0.1 SOL_ADDRESS"
+                        "❌ Please specify token, amount and address.\n\nExample: /withdraw SOL 0.1 SOL_ADDRESS\nExample: /withdraw USDC 5 SOL_ADDRESS"
                     ).await?;
                     return Ok(());
                 }
 
-                let amount_str = parts[1];
-                let to_address = parts[2];
+                let token_input = parts[1];
+                let amount_str = parts[2];
+                let to_address = parts[3];
 
                 let amount: f64 = match amount_str.parse() {
                     Ok(a) => a,
@@ -471,20 +474,105 @@ async fn main() -> Result<()> {
                         println!("✅ Found user with wallet: {}", user.solana_address);
                         println!("✅ Openfort account ID: {}", user.openfort_account_id);
 
-                        match solana::get_balance(&config.solana_rpc_url, &user.solana_address).await {
-                            Ok(balance) => {
-                                let amount_lamports = (amount * 1_000_000_000.0) as u64;
-                                let balance_lamports = (balance * 1_000_000_000.0) as u64;
+                        // ---- SOL withdrawal — unchanged mechanics, just re-indexed args ----
+                        if token_input.to_uppercase() == "SOL" {
+                            match solana::get_balance(&config.solana_rpc_url, &user.solana_address).await {
+                                Ok(balance) => {
+                                    let amount_lamports = (amount * 1_000_000_000.0) as u64;
+                                    let balance_lamports = (balance * 1_000_000_000.0) as u64;
 
-                                println!("💰 Balance: {} SOL, Amount: {} SOL", balance, amount);
-                                println!("📊 Balance lamports: {}, Amount lamports: {}", balance_lamports, amount_lamports);
+                                    println!("💰 Balance: {} SOL, Amount: {} SOL", balance, amount);
+                                    println!("📊 Balance lamports: {}, Amount lamports: {}", balance_lamports, amount_lamports);
 
-                                if balance_lamports < amount_lamports {
+                                    if balance_lamports < amount_lamports {
+                                        bot.send_message(
+                                            chat_id,
+                                            format!(
+                                                "❌ Insufficient balance!\n\nBalance: {:.6} SOL\nRequired: {} SOL",
+                                                balance, amount
+                                            )
+                                        ).await?;
+                                        return Ok(());
+                                    }
+
                                     bot.send_message(
                                         chat_id,
                                         format!(
-                                            "❌ Insufficient balance!\n\nBalance: {:.6} SOL\nRequired: {} SOL",
-                                            balance, amount
+                                            "🔄 Withdrawing {} SOL to `{}`\\.\\.\\.\n\n_Transaction is being processed\\.\\.\\._",
+                                            escape_markdown_v2(&amount.to_string()),
+                                            to_address
+                                        )
+                                    ).parse_mode(teloxide::types::ParseMode::MarkdownV2).await?;
+
+                                    println!("⏳ Calling withdraw::withdraw_sol...");
+                                    println!("📤 account_id: {}", user.openfort_account_id);
+
+                                    match withdraw::withdraw_sol(
+                                        &openfort,
+                                        &user.openfort_account_id,
+                                        &user.solana_address,
+                                        to_address,
+                                        amount_lamports,
+                                        kora_cluster(&config.solana_network),
+                                    ).await {
+                                        Ok(txid) => {
+                                            println!("✅ Withdraw successful! TXID: {}", txid);
+                                            bot.send_message(
+                                                chat_id,
+                                                format!(
+                                                    "✅ Withdraw sent\\!\n\nTXID: `{}`\n\n[View on Explorer](https://explorer.solana.com/tx/{}?cluster={})",
+                                                    txid,
+                                                    txid,
+                                                    kora_cluster(&config.solana_network)
+                                                )
+                                            ).parse_mode(teloxide::types::ParseMode::MarkdownV2).await?;
+                                        }
+                                        Err(e) => {
+                                            println!("❌ Withdraw failed: {}", e);
+                                            bot.send_message(
+                                                chat_id,
+                                                format!("❌ Withdraw failed: {}", e)
+                                            ).await?;
+                                        }
+                                    }
+                                }
+                                Err(e) => {
+                                    println!("❌ Balance check failed: {}", e);
+                                    bot.send_message(chat_id, format!("❌ Balance check failed: {}", e)).await?;
+                                }
+                            }
+                            return Ok(());
+                        }
+
+                        // ---- SPL token withdrawal ----
+                        let mint = jupiter::resolve_token_mint(token_input);
+
+                        match solana::get_all_token_balances(&config.solana_rpc_url, &user.solana_address).await {
+                            Ok(balances) => {
+                                let held = balances.iter().find(|b| b.mint == mint);
+
+                                let token_balance = match held {
+                                    Some(tb) => tb,
+                                    None => {
+                                        bot.send_message(
+                                            chat_id,
+                                            format!("❌ You don't hold any {} in this wallet.", escape_markdown_v2(token_input))
+                                        ).await?;
+                                        return Ok(());
+                                    }
+                                };
+
+                                let amount_raw = (amount * 10f64.powi(token_balance.decimals as i32)).round() as u64;
+                                let balance_raw: u64 = token_balance.amount_raw.parse().unwrap_or(0);
+
+                                println!("💰 Balance: {} raw, Amount: {} raw", balance_raw, amount_raw);
+
+                                if balance_raw < amount_raw {
+                                    bot.send_message(
+                                        chat_id,
+                                        format!(
+                                            "❌ Insufficient balance!\n\nBalance: {:.6} {}\nRequired: {} {}",
+                                            token_balance.ui_amount, token_input, amount, token_input
                                         )
                                     ).await?;
                                     return Ok(());
@@ -493,21 +581,25 @@ async fn main() -> Result<()> {
                                 bot.send_message(
                                     chat_id,
                                     format!(
-                                        "🔄 Withdrawing {} SOL to `{}`\\.\\.\\.\n\n_Transaction is being processed\\.\\.\\._",
+                                        "🔄 Withdrawing {} {} to `{}`\\.\\.\\.\n\n_Transaction is being processed\\.\\.\\._",
                                         escape_markdown_v2(&amount.to_string()),
+                                        escape_markdown_v2(token_input),
                                         to_address
                                     )
                                 ).parse_mode(teloxide::types::ParseMode::MarkdownV2).await?;
 
-                                println!("⏳ Calling withdraw::withdraw_sol...");
+                                println!("⏳ Calling withdraw::withdraw_spl_token...");
                                 println!("📤 account_id: {}", user.openfort_account_id);
 
-                                match withdraw::withdraw_sol(
+                                match withdraw::withdraw_spl_token(
                                     &openfort,
+                                    &config.solana_rpc_url,
                                     &user.openfort_account_id,
                                     &user.solana_address,
                                     to_address,
-                                    amount_lamports,
+                                    &mint,
+                                    amount_raw,
+                                    token_balance.decimals,
                                     kora_cluster(&config.solana_network),
                                 ).await {
                                     Ok(txid) => {

@@ -163,6 +163,110 @@ pub async fn get_token_decimals(rpc_url: &str, mint: &str) -> Result<u8> {
     Ok(decimals as u8)
 }
 
+/// Resolves which token program owns a given mint (legacy SPL Token vs Token-2022).
+/// One getAccountInfo call on the mint address itself — the `owner` field of that
+/// account IS the token program ID, since a mint account is owned by whichever
+/// program manages it. Needed for withdrawal: deriving the correct Associated
+/// Token Account and building `transfer_checked` both require knowing the right
+/// program up front, rather than guessing/trying both.
+pub async fn resolve_token_program(rpc_url: &str, mint: &str) -> Result<String> {
+    println!("🔍 Resolving token program for mint: {}", mint);
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(15))
+        .build()?;
+
+    let request_body = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getAccountInfo",
+        "params": [mint, { "encoding": "jsonParsed" }]
+    });
+
+    let response = client
+        .post(rpc_url)
+        .header("Content-Type", "application/json")
+        .json(&request_body)
+        .send()
+        .await?;
+
+    let status = response.status();
+    let response_text = response.text().await?;
+
+    println!("📄 Mint account-info response: {}", response_text);
+
+    if !status.is_success() {
+        return Err(anyhow!("HTTP error: {}", status));
+    }
+
+    let response_json: serde_json::Value = serde_json::from_str(&response_text)?;
+
+    if let Some(error) = response_json.get("error") {
+        return Err(anyhow!(
+            "RPC error while resolving token program for {}: {}",
+            mint,
+            error
+        ));
+    }
+
+    let owner = response_json["result"]["value"]["owner"]
+        .as_str()
+        .ok_or_else(|| {
+            anyhow!(
+                "Mint account {} not found or has no owner — is this a valid mint address?",
+                mint
+            )
+        })?;
+
+    if owner != TOKEN_PROGRAM_ID && owner != TOKEN_2022_PROGRAM_ID {
+        return Err(anyhow!(
+            "Mint {} is owned by an unrecognized program ({}), not SPL Token or Token-2022",
+            mint,
+            owner
+        ));
+    }
+
+    Ok(owner.to_string())
+}
+
+/// Checks whether an account (e.g. an Associated Token Account) exists on-chain.
+/// Used before withdrawal to confirm the recipient's ATA is already funded —
+/// this project does not auto-create a missing recipient ATA (see withdraw/mod.rs).
+pub async fn account_exists(rpc_url: &str, address: &str) -> Result<bool> {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(15))
+        .build()?;
+
+    let request_body = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getAccountInfo",
+        "params": [address, { "encoding": "base64" }]
+    });
+
+    let response = client
+        .post(rpc_url)
+        .header("Content-Type", "application/json")
+        .json(&request_body)
+        .send()
+        .await?;
+
+    let status = response.status();
+    let response_text = response.text().await?;
+
+    if !status.is_success() {
+        return Err(anyhow!("HTTP error: {}", status));
+    }
+
+    let response_json: serde_json::Value = serde_json::from_str(&response_text)?;
+
+    if let Some(error) = response_json.get("error") {
+        return Err(anyhow!("RPC error checking account {}: {}", address, error));
+    }
+
+    Ok(!response_json["result"]["value"].is_null())
+}
+
 /// Fetches token accounts for a specific token program (SPL or Token-2022)
 async fn fetch_token_accounts_for_program(
     rpc_url: &str,
