@@ -338,10 +338,10 @@ The roadmap focuses on hardening the existing working implementation into a reus
 | Phase | Focus | Status |
 |---|---|---|
 | M1 | Transaction safety controls (confirmation, limits, validation, replay protection, history, logging) | Planned |
-| M2 | Account recovery & anti-takeover (TOTP, backup codes, cooldowns, notification, audit logging) | Planned |
-| M3 | Independent security review & remediation | Planned |
+| M2 | Account recovery and anti-takeover (TOTP, backup codes, cooldowns, notification, audit logging) | Planned |
+| M3 | Independent security review and remediation | Planned |
 | M4 | Infrastructure hardening (RPC failover, least-privilege credentials, key-share export verification) | Planned |
-| M5 | Testing, developer experience & reproducibility | Planned |
+| M5 | Testing, developer experience and reproducibility | Planned |
 | M6 | Documentation, secret rotation, provider abstraction boundary, production deployment guide | Planned |
 
 **→ Full deliverables, sequencing logic, and non-goals per milestone:** [`ROADMAP.md`](./Roadmap.md)
