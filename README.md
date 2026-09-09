@@ -28,7 +28,7 @@ Solana fits this use case specifically because interactions are cheap and fast e
 | Feature| Status|
 | ---| ---|
 | Telegram bot (basic frontend)| ✅ |
-| Openfort Backend Wallet creation| ✅ network-agnostic - same address on both clusters|
+| Openfort Backend Wallet creation| ✅ not network-specific — same address on both clusters|
 | SOL balance check| ✅ Mainnet|
 | SPL / Token-2022 balances| ✅ Mainnet|
 | Jupiter swaps (buy/sell)| ✅ Mainnet|
