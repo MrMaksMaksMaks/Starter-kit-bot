@@ -2,7 +2,7 @@
 
 Security is a core design consideration of this project and an area of active, ongoing work.
 
-This repository is, at its core, a reference architecture for a specific class of problem: what happens when a messaging application's identity — a Telegram account — becomes the primary user interface and authorization entry point to a managed, backend-controlled Solana wallet. That framing is the actual contribution this project makes to the Solana developer ecosystem — the interesting engineering problem here is the identity/authorization boundary itself, ahead of the trading-bot UI wrapped around it.
+This repository is, at its core, a reference architecture for a specific class of problem: what happens when a messaging application's identity — a Telegram account — becomes the primary user interface and authorization entry point to a managed, backend-controlled Solana wallet. That framing is the actual contribution this project makes to the Solana developer ecosystem. The interesting engineering problem here is the identity/authorization boundary itself, ahead of the trading-bot UI wrapped around it.
 
 > **Scope:** This document describes the security model, known limitations, and planned hardening of the Solana Starter Kit Bot. It is a living document that will be updated as the [proposed roadmap](./README.md#roadmap) progresses.
 
@@ -37,7 +37,7 @@ The intended production configuration is to provision runtime credentials accord
 
 The project will independently verify the exact semantics of these permissions, the applicability of policy controls to Solana backend wallets, and the behavior of the system under compromised application credentials.
 
-**The central security distinction** is between key protection and signing authorization: protecting key material inside the signing infrastructure does not, by itself, prevent a compromised backend from requesting an unauthorized signature. This proposed security work therefore focuses on reducing the authorization surface and documenting which protections remain effective after different levels of backend compromise.
+**The central security distinction** is between key protection and signing authorization. Protecting key material inside the signing infrastructure does not, by itself, prevent a compromised backend from requesting an unauthorized signature. This proposed security work therefore focuses on reducing the authorization surface and documenting which protections remain effective after different levels of backend compromise.
 
 ---
 
@@ -95,7 +95,13 @@ Openfort
 
 Openfort is the current wallet infrastructure provider used by this reference implementation. It is not treated as a trusted-by-default security boundary, and its specific implementation is not assumed to be the security model of the application.
 
-The project does not currently claim to be provider-agnostic — the working code (message-vs-full-transaction signing, `X-Wallet-Auth` JWT construction, payload encoding, API version differences) is Openfort-specific. What the project does commit to: isolating that specificity behind a clear internal boundary (see [Roadmap](./README.md#roadmap)), M6 — Wallet provider abstraction boundary), and documenting which parts of the security model are Openfort-specific versus generic to any backend-wallet provider. That same M6 work also includes a conceptual comparison against alternative Solana wallet/signing infrastructure, such as Turnkey and Crossmint.
+The project is not provider-agnostic today. Parts of the code are written specifically for Openfort: how transactions are signed, how the `X-Wallet-Auth` JWT is built, how payloads are encoded, and how differences between Openfort API versions are handled.
+
+The project does commit to three things, all part of the M6 milestone (see the [Roadmap](./README.md#roadmap)):
+
+- Isolating that Openfort-specific code behind a clear internal boundary.
+- Documenting which parts of the security model are specific to Openfort and which apply to any backend-wallet provider.
+- Comparing the architecture, at a conceptual level, against other Solana wallet providers such as Turnkey and Crossmint.
 
 This is a comparative documentation exercise, not a commitment to build or maintain a second working provider integration — doing so would meaningfully expand scope beyond what the proposed roadmap covers.
 
