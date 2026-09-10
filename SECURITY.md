@@ -43,9 +43,7 @@ The project will independently verify the exact semantics of these permissions, 
 
 ## Key Material and Export Boundary
 
-The application does not directly store or handle users' private keys. Backend-wallet signing is delegated to Openfort.
-
-However, the Openfort project configuration exposes separate API-key permissions for **Private key shares → export**. This means that the security model cannot be reduced to "the key never leaves the TEE."
+Beyond the custody delegation described above, the Openfort project configuration exposes separate API-key permissions for **Private key shares → export**. This means that the security model cannot be reduced to "the key never leaves the TEE."
 
 The project therefore treats private-key-share export as a separate administrative capability and will explicitly verify:
 
@@ -205,7 +203,7 @@ The roadmap focuses on a defined set of security improvements:
 - Wallet secret rotation policy for the Openfort signing key, leveraging Openfort's built-in rotation endpoint.
 - Reference integration with a platform secret manager (AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault) for production secret storage.
 - Verification of whether Keys A, B, and C share a single underlying Openfort wallet secret, and documentation of how that affects the credential-isolation model (see Credentials and Scope Model above).
-- Verification of whether Openfort's server actually enforces uniqueness on the `jti` nonce carried by each `X-Wallet-Auth` JWT — confirming or ruling out real replay protection at the request-authentication level.
+- Verification of whether Openfort's server actually enforces uniqueness on the `jti` nonce carried by each `X-Wallet-Auth` JWT (see Current Limitations above).
 - A documented internal boundary isolating Openfort-specific integration code from application-level security logic (see Provider Independence above).
 
 The goal is not to claim that the starter kit becomes universally "production secure." Instead, the project will provide a significantly stronger and better-documented security baseline that developers can evaluate and extend for their own applications.
@@ -220,9 +218,7 @@ The goal is not to claim that the starter kit becomes universally "production se
 
 **This is account recovery, not key recovery.**
 
-The recovery mechanism does not recover, reconstruct, export, or directly access the wallet's private signing key. Instead, it restores the association between a verified Telegram identity and an existing Openfort account. Once restored, the application may again request authorized signing operations for that account.
-
-Recovery therefore protects the identity-to-account association, not the private key itself. It does not protect against compromise of the backend's signing credentials or Openfort authorization layer.
+The recovery mechanism does not recover, reconstruct, export, or directly access the wallet's private signing key. Instead, it restores the association between a verified Telegram identity and an existing Openfort account, allowing the application to again request authorized signing operations for that account. It does not, however, protect against compromise of the backend's signing credentials or the Openfort authorization layer.
 
 ### Design principles
 
