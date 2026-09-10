@@ -41,7 +41,7 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 ---
 
-## Live mainnet proofS
+## Live mainnet proof
 
 | Flow| Signature| Explorer|
 | ---| ---| ---|
@@ -52,7 +52,8 @@ Solana fits this use case specifically because interactions are cheap and fast e
 
 | Flow| Signature| Explorer|
 | ---| ---| ---|
-| Sponsored withdrawal (via Kora)| `27PAXPkFoD97ZBcVemXN3o3B1eMAsdJkmmgFUe9dKGYjE8PkwgNK4JQJNt2HCGMmmMTsoQiHSETUwuJD98yC9x87`| [View](https://explorer.solana.com/tx/27PAXPkFoD97ZBcVemXN3o3B1eMAsdJkmmgFUe9dKGYjE8PkwgNK4JQJNt2HCGMmmMTsoQiHSETUwuJD98yC9x87)|
+| Sponsored SOL withdrawal (via Kora, self-transfer)| `27PAXPkFoD97ZBcVemXN3o3B1eMAsdJkmmgFUe9dKGYjE8PkwgNK4JQJNt2HCGMmmMTsoQiHSETUwuJD98yC9x87`| [View](https://explorer.solana.com/tx/27PAXPkFoD97ZBcVemXN3o3B1eMAsdJkmmgFUe9dKGYjE8PkwgNK4JQJNt2HCGMmmMTsoQiHSETUwuJD98yC9x87?cluster=devnet)|
+| Sponsored SPL token withdrawal (via Kora, devnet USDC, two distinct wallets)| `29NJZLAuu84A3V84eRVDnjViAiL7Erq9FAzdfp7b25BRyQtCGYTE4MVJJWPt7jzwbyGTpeLWCqXLgkSCfrv1dkTX`| [View](https://explorer.solana.com/tx/29NJZLAuu84A3V84eRVDnjViAiL7Erq9FAzdfp7b25BRyQtCGYTE4MVJJWPt7jzwbyGTpeLWCqXLgkSCfrv1dkTX?cluster=devnet)|
 
 *The SOL row above is a self-transfer (`from` == `to`) — used to generate a verifiable signature without funding a second wallet; the transferred amount returns to the same address, while the fee itself is paid by the Fee Payer account shown in the transaction, confirming gasless sponsorship. The SPL row moves real balance between two distinct wallets, with both the debit and credit visible in the transaction's Tokens tab.*
 
