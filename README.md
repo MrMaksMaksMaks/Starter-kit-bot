@@ -372,7 +372,7 @@ The wallet integration, transaction signing, swap, and withdrawal logic is the s
 
 ## Contributing
 
-Contributions, bug reports, and improvements are welcome.
+Contributions are welcome — here's the basic workflow:
 
 ```bash
 git checkout -b feature/my-feature
