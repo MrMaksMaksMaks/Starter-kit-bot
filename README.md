@@ -17,9 +17,9 @@ This repository stays deliberately narrow in scope: advanced trading features (l
 
 ## What is it?
 
-Building a Telegram bot that talks to Solana normally means integrating wallet infrastructure, secure signing, RPC communication, swap routing, transaction sponsorship, and persistent state before a single feature idea can even be tested. Solana Starter Kit Bot is built with Rust and Teloxide, using Openfort Backend Wallets for signing, Jupiter for swaps, and Kora for sponsored transactions. This is a working reference other developers can inspect and build on directly, instead of solving each of those problems from scratch.
+Building a Telegram bot that talks to Solana normally means integrating wallet infrastructure, secure signing, RPC communication, swap routing, transaction sponsorship, and persistent state before a single feature idea can even be tested. Solana Starter Kit Bot is built with Rust and Teloxide, using Openfort Backend Wallets for signing, Jupiter for swaps, and Kora for sponsored withdrawals. This is a working reference other developers can inspect and build on directly, instead of solving each of those problems from scratch.
 
-Solana fits this use case specifically because interactions are cheap and fast enough for a conversational, frequent-action UX, Jupiter's liquidity is deep enough that swaps don't need custom routing, and Kora's sponsorship infrastructure lets transaction fees be abstracted away from the end user for supported flows.
+Solana fits this use case specifically because interactions are cheap and fast enough for a conversational, frequent-action UX, Jupiter's liquidity is deep enough that swaps don't need custom routing, and Kora's sponsorship infrastructure lets transaction fees be abstracted away from the end user for withdrawals. 
 
 ---
 
@@ -35,7 +35,7 @@ Solana fits this use case specifically because interactions are cheap and fast e
 | Kora sponsored (gasless) withdrawals (SOL + SPL tokens)| ✅ Devnet|
 | Jupiter Referral (optional, disabled by default)| ✅ Mainnet|
 
-> For supported flows, Kora can sponsor transaction fees so the user does not need to hold SOL specifically to pay the network fee.
+> Kora sponsors transaction fees for withdrawals, so the user does not need to hold SOL specifically to pay the network fee. Swaps are not sponsored — the user's own wallet pays that network fee directly.
 
 > **Note:** Wallet creation is not network-specific. Openfort provides a single Solana keypair/address that is simultaneously valid on devnet and mainnet-beta, since Solana addresses aren't per-cluster (only account state is). Balance checks, swaps, and withdrawals, by contrast, genuinely run against whichever cluster is configured. Mainnet testing confirms those work with real funds and live infrastructure.
 
