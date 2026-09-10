@@ -18,7 +18,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 - Configurable withdrawal limits, with clear user feedback when a limit is exceeded.
 - Solana address validation before transaction construction; malformed or invalid destinations are rejected before signing.
 - Rate limiting for sensitive bot commands, with stronger limits on withdrawal and transaction-related operations.
-- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which relies on a per-request JWT nonce (jti) whose actual server-side enforcement is unverified - see M4. This deliverable closes the separate, confirmed gap at the transaction-submission level.)
+- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which relies on a per-request JWT nonce (jti); its server-side enforcement is confirmed — a reused jti is rejected with a 401 — see M4 for formal test coverage. This deliverable closes the separate, confirmed gap at the transaction-submission level.)
 - Transaction history for supported wallet operations: withdrawals, swaps, signatures, timestamps, status.
 - Reconciliation of in-flight transactions against on-chain state on startup — resolving any records left in a pending status by an unexpected shutdown (crash, power loss, or planned restart), not just by an explicit shutdown procedure.
 - Structured transaction and security logging.
@@ -93,7 +93,7 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
   - **Key B — Policy provisioning:** `policies:read/write` only, no `accounts:sign`. Never accepts arbitrary policy JSON — limited to a fixed, non-user-controlled workflow of predefined policy profiles.
   - **Key C — Security administration:** `policies:read/write/delete`, explicitly without `accounts:sign` and without `private_key_shares:export`; held and used outside the production runtime.
 - Verification of whether Keys A, B, and C share a single underlying Openfort wallet secret (Openfort documents only one active wallet secret per project), and what that implies for the credential-isolation model if so.
-- Verification of whether Openfort's server actually enforces uniqueness on the `jti` nonce carried by each signing-authentication request — confirming or ruling out real replay protection at that layer, rather than assuming it from the nonce's presence alone.
+- Formal, repeatable test coverage for Openfort's jti-nonce replay protection — already confirmed informally against the live API (a reused jti is rejected with a 401) — turning that into a documented, regression-tested guarantee rather than a one-off manual check.
 - Verification of whether a Key-B-scoped credential can attach a new, more permissive policy to a wallet that already has one, and how Openfort resolves multiple project-level and account-level policies on the same account.
 - Restrict production API-key access by IP where supported.
 - Keep Openfort credentials outside source control at every stage, including CI/CD and deployment tooling.

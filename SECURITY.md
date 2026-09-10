@@ -176,7 +176,7 @@ This repository is a working starter kit, not a fully hardened production system
 - Withdrawal limits are not currently enforced.
 - There is no dedicated transaction history.
 - Telegram command rate limiting is not currently implemented.
-- Replay protection at the Solana transaction level (preventing the same swap or withdrawal from being submitted twice) beyond Solana's own blockhash expiry is not implemented — this is distinct from Openfort API request replay: each signing request includes a freshly generated JWT nonce (`jti`), and whether Openfort's server actually validates and rejects reused `jti` values remains an open item to verify during M3/M4.
+- Replay protection at the Solana transaction level (preventing the same swap or withdrawal from being submitted twice) beyond Solana's own blockhash expiry is not implemented — this is distinct from Openfort API request replay, which is separately covered: each signing request includes a freshly generated JWT nonce (`jti`), confirmed directly against the live API to reject a reused value with a 401.
 - Transactions are not simulated before signing.
 - There is no recovery path if a user's Telegram identity changes or is lost.
 - Secrets are currently provided via environment variables only; integration with a dedicated secret manager (e.g. AWS Secrets Manager, Google Secret Manager, HashiCorp Vault) for production deployments is not yet implemented.
@@ -203,7 +203,7 @@ The roadmap focuses on a defined set of security improvements:
 - Wallet secret rotation policy for the Openfort signing key, leveraging Openfort's built-in rotation endpoint.
 - Reference integration with a platform secret manager (AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault) for production secret storage.
 - Verification of whether Keys A, B, and C share a single underlying Openfort wallet secret, and documentation of how that affects the credential-isolation model (see Credentials and Scope Model above).
-- Verification of whether Openfort's server actually enforces uniqueness on the `jti` nonce carried by each `X-Wallet-Auth` JWT (see Current Limitations above).
+- Formal test coverage and documentation of Openfort's jti-nonce replay protection, confirmed against the live API during development (see Current Limitations above) — turning that informal check into a repeatable, regression-tested guarantee.
 - A documented internal boundary isolating Openfort-specific integration code from application-level security logic (see Provider Independence above).
 
 The goal is not to claim that the starter kit becomes universally "production secure." Instead, the project will provide a significantly stronger and better-documented security baseline that developers can evaluate and extend for their own applications.

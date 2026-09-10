@@ -311,7 +311,7 @@ The starter kit is designed to demonstrate a safer architecture for Telegram-nat
 
 - The Telegram bot does **not** store users' private keys in SQLite or in the application source code.
 - Transaction signing is delegated to **Openfort Backend Wallet** infrastructure.
-- Each authenticated request to Openfort includes a freshly generated unique jti. Whether Openfort's server actually enforces uniqueness on it, and whether this field delivers real replay protection, remains an open item under the provider trust-boundary verification (see SECURITY.md).
+- Each authenticated request to Openfort includes a freshly generated unique jti. Openfort's server enforces uniqueness on it, confirmed directly against the live API — a reused jti is rejected with a 401 (see SECURITY.md).
 - The application stores the mapping between the Telegram user and the corresponding Openfort account / Solana wallet.
 
 **→ Full threat model, credential-scoping analysis, key-material export boundaries, known limitations, and planned hardening:** [`SECURITY.md`](./SECURITY.md)
