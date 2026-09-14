@@ -14,13 +14,14 @@ This document describes the planned hardening work for Solana Starter Kit Bot in
 **Goal:** Move from "the transaction works" to "the transaction flow has basic safety controls" - the minimum needed before real users should be trusted with real funds.
 
 **Deliverables**
-- Withdrawal confirmation using Telegram inline keyboards.
+- Withdrawal confirmation using Telegram inline keyboards. This required a bigger change underneath: moving the bot from a single message-only loop to a proper update-dispatching framework. Without that change, the bot has no way to receive a button tap at all — it isn't just a cleaner way to write the same code.
 - Configurable withdrawal limits, with clear user feedback when a limit is exceeded.
 - Solana address validation before transaction construction; malformed or invalid destinations are rejected before signing.
+- Saved withdrawal addresses, so users don't have to retype a full 44-character address every time. Up to 5 per user; the least recently used is dropped to make room for a new one. An address is saved either by an explicit command or automatically the first time a withdrawal to it succeeds. Saved addresses appear as buttons to pick from, which also cuts down on fat-finger typos when entering an address manually.
 - Rate limiting for sensitive bot commands, with stronger limits on withdrawal and transaction-related operations.
-- Solana-level transaction replay / duplicate-submission protection. (This is distinct from Openfort API request replay, which relies on a per-request JWT nonce (jti); its server-side enforcement is confirmed — a reused jti is rejected with a 401 — see M4 for formal test coverage. This deliverable closes the separate, confirmed gap at the transaction-submission level.)
+- Solana-level transaction replay / duplicate-submission protection. Each withdrawal attempt is tracked by an idempotency key tied to the Telegram message that triggered it, not to the withdrawal's amount or address — so a user can repeat the exact same withdrawal on purpose without it being blocked. What is blocked is Telegram redelivering the same message, or the bot retrying a request that already went through. (See reconciliation, below, for what happens if the bot crashes mid-attempt. This is also distinct from Openfort's own API request replay protection, which uses a per-request JWT nonce (jti) — already confirmed working, a reused jti is rejected with a 401; see M4 for formal test coverage.)
 - Transaction history for supported wallet operations: withdrawals, swaps, signatures, timestamps, status.
-- Reconciliation of in-flight transactions against on-chain state on startup — resolving any records left in a pending status by an unexpected shutdown (crash, power loss, or planned restart), not just by an explicit shutdown procedure.
+- Reconciliation of in-flight transactions against on-chain state. Runs at startup, and again every two minutes while the bot is running — not just once, so a transaction that gets stuck mid-session doesn't have to wait for a restart to be caught. It works by searching the sender's on-chain transaction history for a match. If no match is found, the transaction is flagged for manual review rather than assumed to have failed — an unclear outcome is never treated as safe to retry automatically.
 - Structured transaction and security logging.
 - Initial security baseline and threat-model documentation.
 - Automated tests for critical withdrawal and wallet flows.
