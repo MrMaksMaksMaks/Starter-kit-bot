@@ -16,6 +16,7 @@ This repository is, at its core, a reference architecture for a specific class o
 - [Provider Independence](#provider-independence)
 - [Credentials and Scope Model](#credentials-and-scope-model)
 - [Compromised Component Analysis](#compromised-component-analysis)
+- [SQL Injection Resistance](#sql-injection-resistance)
 - [Current Limitations](#current-limitations)
 - [Planned Security Hardening](#planned-security-hardening)
 - [Recovery Threat Model](#recovery-threat-model)
@@ -165,6 +166,20 @@ The table below makes Layer 3's boundary concrete by breaking down exactly what 
 This table depends on an assumption that is explicitly **not yet verified** and is itself part of the proposed work (M4): whether Key B (scoped to `policies:write`, without `policies:delete`) can attach a new, more permissive policy to an *existing* wallet that already has a policy attached — and, if so, how Openfort's project-level and account-level policies are combined or take precedence over one another.
 
 If a compromised Key B can effectively override an existing wallet's policy by creating a new one, credential scoping alone does not close this gap, and the fixed, non-arbitrary provisioning workflow described in M4 becomes the primary control for this specific risk.
+
+---
+
+## SQL Injection Resistance
+
+The compromised-component table above notes that a leaked or stolen database yields no signing capability on its own (see Layer 3's design). A separate, prior question is whether an attacker could reach or corrupt that database *through the application itself* — via a Telegram command argument, for instance. This section documents why that path is closed.
+
+All database access in this project goes through two files — `src/db/repository.rs` and `src/db/mod.rs`. No other module touches SQL: the Jupiter, Solana RPC, Openfort, and withdrawal modules speak only to external HTTP/RPC endpoints, never to the database directly.
+
+Within those two files, every query that includes a value derived from user input — a Telegram command argument, a wallet address, an amount, an idempotency key, a recovery code, a timestamp cutoff — passes that value through `sqlx`'s bound-parameter mechanism (`$1`, `$2`, ... placeholders with `.bind(...)`), never through direct interpolation into the query text. The query's *shape* is fixed at compile time; user-controlled data can only occupy a parameter slot, never alter the SQL being executed.
+
+The only place `format!()` participates in building a query string at all is to substitute a compile-time-constant column list (e.g. `WithdrawIntentRepository::COLUMNS`) into a `SELECT` / `RETURNING` clause — a plain don't-repeat-yourself technique for a fixed set of column names defined once per repository, never a value that varies at runtime or could be influenced by a user.
+
+**This is a verified property, not an assumed one.** Every call site using `sqlx::query` or `sqlx::query_as` in the codebase was checked for how its query text is constructed — not a sample, all of them — and every non-literal case was inspected individually to confirm it interpolates only a fixed, hardcoded constant, never external input. This check should be repeated whenever new repository code is added.
 
 ---
 
